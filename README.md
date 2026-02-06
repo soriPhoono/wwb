@@ -1,4 +1,4 @@
-CSCE 4560/5560 Spring 2026
+CSCE 4560/5560 Spring 2026 Group 14
 
 Secure E-Commerce website demonstration
 
