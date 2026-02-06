@@ -7,6 +7,12 @@ Kaden Martin
 Bryson "Bryce" Flaherty
 Jackson Moody
 
+Please view the CONTRIBUTING.md file in order to learn how you can help contribute to development on this project
+
+Contact Lead: Kaden Martin
+Contact Email: KadenMartin@my.unt.edu
+Please email me through a UNT email address only,
+
 Languages:
 HTML
 CSS
