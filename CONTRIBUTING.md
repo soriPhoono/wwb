@@ -1,4 +1,4 @@
-#Contributing to (TBD Website)
+\#Contributing to (TBD Website)
 
 Thanks for considering to help us with our project, this is a learning endeavor for our team.
 
@@ -12,10 +12,13 @@ Explain the steps to reproduce for the bug
 Mention what browser you were using.
 
 ### Suggestions
+
 Have a suggestion for our team to look at? Open an issue and describe the feature to us
 
-### PR's
+### PR/MR's
+
 If you would like to take a look at our project yourself, this is what you can do:
+
 1. Fork the repository
 2. Create a branch in your fork
 3. Commit some changes to your branch
@@ -23,4 +26,6 @@ If you would like to take a look at our project yourself, this is what you can d
 5. Open a pull/merge request
 
 ## Conduct
+
 Please be courteous, and respectful in your comments, code reviews, and pull/merge requests.
+

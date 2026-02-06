@@ -1,4 +1,4 @@
-Copyright [2026] Kaden Martin, Bryce Floherty and Jackson Moody, all rights reserved
+Copyright [2026] Kaden Martin, Bryce Flaherty and Jackson Moody, All Rights Reserved
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
