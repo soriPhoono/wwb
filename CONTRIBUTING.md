@@ -20,7 +20,7 @@ If you would like to take a look at our project yourself, this is what you can d
 2. Create a branch in your fork
 3. Commit some changes to your branch
 4. Push your changes to your branch
-5. Open a pull request
+5. Open a pull/merge request
 
 ## Conduct
-Please be courteous, and respectful in your comments, code reviews, and pull requests.
+Please be courteous, and respectful in your comments, code reviews, and pull/merge requests.
