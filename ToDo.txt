@@ -5,5 +5,6 @@ Initialize a server to host web pages
 Implement cookies
 Integrate CSS into HTML pages
 Update landing page and error 404 page to be nicer?
+Integrate a payment processor service (Shopify, etc)
 
 If you have other ideas, please open a PR/MR with your additions to this file. This should help us in the long run! -Kaden
