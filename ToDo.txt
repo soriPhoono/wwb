@@ -1,10 +1,20 @@
 To Do:
-Create Website Pages
-Integrate login/ authentication
-Initialize a server to host web pages
-Implement cookies
-Integrate CSS into HTML pages
-Update landing page and error 404 page to be nicer?
-Integrate a payment processor service (Shopify, etc)
+
+Website structure/code:
+
+Build out the website landing page (Update to be more aesthetic/user-friendly)
+Build smaller pages for product listings and detailed descriptions.
+Develop an enhanced "404 Not Found" page from the current skeleton.
+
+Server/Security:
+Initialize a server to host web pages.
+Integrate login and user authentication.
+Demonstrate and implement the use of cookies on the website.
+
+Front End:
+Integrate and organize CSS styles into HTML pages
+
+Commerce/Payments:
+Integrate a payment processor service (e.g., Shopify, Stripe, etc.) to handle transactions.
 
 If you have other ideas, please open a PR/MR with your additions to this file. This should help us in the long run! -Kaden
