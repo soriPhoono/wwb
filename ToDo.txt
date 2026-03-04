@@ -1,6 +1,6 @@
 To Do:
 
-Website structure/code:
+Front End (Website code, etc):
 
 Build out the website landing page (Update to be more aesthetic/user-friendly)
 Build smaller pages for product listings and detailed descriptions.
@@ -10,9 +10,6 @@ Server/Security:
 Initialize a server to host web pages.
 Integrate login and user authentication.
 Demonstrate and implement the use of cookies on the website.
-
-Front End:
-Integrate and organize CSS styles into HTML pages
 
 Commerce/Payments:
 Integrate a payment processor service (e.g., Shopify, Stripe, etc.) to handle transactions.
