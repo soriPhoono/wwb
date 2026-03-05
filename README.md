@@ -8,8 +8,11 @@ David Cohen
 Jackson Moody
 
 
-Please view the CONTRIBUTING.md file in order to learn how you can help contribute to development on this project.
 
+Project development roles:
+Kaden Martin - Front End (HTML/CSS/XML) and Project Manager
+David Cohen - Combined Front/Backend and QA control
+Jackson Moody - to be determined
 
 Contact Lead: Kaden Martin
 
@@ -18,10 +21,15 @@ Contact Email: KadenMartin@my.unt.edu
 Please email me through a UNT email address only, emails from other addresses will be ignored.
 
 
+Please view the CONTRIBUTING.md file in order to learn how you can help contribute to development on this project.
+
+
+
 Languages:
 HTML
 CSS
 JavaScript
+
 
 
 To Do:
