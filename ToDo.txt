@@ -2,14 +2,11 @@ To Do:
 
 Front End (Website code, etc):
 
-Build out the website landing page (Update to be more aesthetic/user-friendly)
-Build smaller pages for product listings and detailed descriptions.
 Develop an enhanced "404 Not Found" page from the current skeleton.
 
 Server/Security:
 Initialize a server to host web pages.
 Integrate login and user authentication.
-Demonstrate and implement the use of cookies on the website.
 
 Commerce/Payments:
 Integrate a payment processor service (e.g., Shopify, Stripe, etc.) to handle transactions.
