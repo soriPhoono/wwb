@@ -1,4 +1,4 @@
-\#Contributing to (TBD Website)
+#Contributing to (TBD Website)
 
 Thanks for considering to help us with our project, this is a learning endeavor for our team.
 
@@ -20,12 +20,11 @@ Have a suggestion for our team to look at? Open an issue and describe the featur
 If you would like to take a look at our project yourself, this is what you can do:
 
 1. Fork the repository
-2. Create a branch in your fork
-3. Commit some changes to your branch
-4. Push your changes to your branch
-5. Open a pull/merge request
+1. Create a branch in your fork
+1. Commit some changes to your branch
+1. Push your changes to your branch
+1. Open a pull/merge request
 
 ## Conduct
 
 Please be courteous, and respectful in your comments, code reviews, and pull/merge requests.
-

@@ -34,3 +34,7 @@ yarn-error.log*
 dist/
 out/
 build/
+
+# --- Nix ---
+.direnv/
+.pre-commit-config.yaml
