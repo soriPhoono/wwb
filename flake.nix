@@ -67,6 +67,35 @@
         # --- Configuration Builders --- #
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
+
+        # --- Deployment ---
+        apps = {
+          build-backend = {
+            type = "app";
+            program = lib.getExe (pkgs.writeShellApplication {
+              name = "build-backend";
+              runtimeInputs = [pkgs.docker];
+              text = ''
+                docker build \
+                  --tag wwb-backend:latest \
+                  "${./wwb/backend}"
+              '';
+            });
+          };
+
+          build-frontend = {
+            type = "app";
+            program = lib.getExe (pkgs.writeShellApplication {
+              name = "build-frontend";
+              runtimeInputs = [pkgs.docker];
+              text = ''
+                docker build \
+                  --tag wwb-frontend:latest \
+                  "${./wwb/frontend}"
+              '';
+            });
+          };
+        };
       };
     };
 }
