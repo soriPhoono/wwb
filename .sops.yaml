@@ -1,0 +1,13 @@
+keys:
+  - &cluster_ecom age12kxe2rf85q3j6rgd892hpezyggcl9ll3lntvvg39faf2evxl6sssj8hx9r
+  - &admin_soriphoono age1y4x8gzzcdhxvqaf9matt0eze3z3yxwx607avq4cexfkgwal4psesj39lvn
+creation_rules:
+  - path_regex: docker/clusters/ecom/secrets/.*\.txt
+    key_groups:
+      - age:
+          - *admin_soriphoono
+  - path_regex: docker/stacks/wwb/secrets/.*
+    key_groups:
+      - age:
+          - *admin_soriphoono
+          - *cluster_ecom

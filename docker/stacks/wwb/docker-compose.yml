@@ -1,0 +1,162 @@
+services:
+  # ──────────────────────────────────────────────
+  # MongoDB — primary data store
+  # ──────────────────────────────────────────────
+  mongo:
+    image: mongo:latest
+    configs:
+      - source: mongo-init
+        target: /docker-entrypoint-initdb.d/init.js
+        mode: 444
+    secrets:
+      - mongo-root-password
+      - mongo-database-password
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-root-password
+      MONGO_INITDB_DATABASE: wwb-db
+      MONGO_INITDB_DATABASE_USERNAME: wwb-service
+      MONGO_INITDB_DATABASE_PASSWORD_FILE: /run/secrets/mongo-database-password
+    networks:
+      - wwb-internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+  # ──────────────────────────────────────────────
+  # Mongo Express — web-based MongoDB admin UI
+  # ──────────────────────────────────────────────
+  mongo-express:
+    image: mongo-express:latest
+    entrypoint: ["/bin/sh", "/configs/entrypoint.sh"]
+    configs:
+      - source: mongo-express-entrypoint
+        target: /configs/entrypoint.sh
+        mode: 755
+    depends_on:
+      - mongo
+    secrets:
+      - mongo-root-password
+      - mongo-express-password
+    environment:
+      ME_CONFIG_SITE_BASEURL: /db
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: "27017"
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD_FILE: /run/secrets/mongo-root-password
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD_FILE: /run/secrets/mongo-express-password
+    networks:
+      - wwb-internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  # ──────────────────────────────────────────────
+  # Backend — Express + Node.js API
+  # ──────────────────────────────────────────────
+  backend:
+    image: wwb-backend:latest
+    build:
+      context: ../../../wwb/backend
+    depends_on:
+      - mongo
+    secrets:
+      - mongo-database-password
+      - jwt-secret
+    environment:
+      NODE_ENV: production
+      API_PORT: "3000"
+      MONGO_URI: mongodb://wwb-service:{PASSWORD}@mongo:27017/wwb-db?authSource=admin
+      MONGO_PASSWORD_FILE: /run/secrets/mongo-database-password
+      JWT_SECRET_FILE: /run/secrets/jwt-secret
+      FRONTEND_ORIGIN: https://wwb.${DOMAIN_NAME}
+    networks:
+      - wwb-internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  # ──────────────────────────────────────────────
+  # Frontend — Vue 3 / Caddy static server
+  # Caddy proxies /api/* → backend:3000
+  # ──────────────────────────────────────────────
+  frontend:
+    image: wwb-frontend:latest
+    build:
+      context: ../../../wwb/frontend
+    depends_on:
+      - backend
+    networks:
+      - wwb-internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  # ──────────────────────────────────────────────
+  # Cloudflared — Cloudflare Tunnel for external access
+  # Forwards cloudflare edge → frontend:80
+  # ──────────────────────────────────────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    # Read token from Swarm secret file and pass to cloudflared
+    command: tunnel --no-autoupdate run
+    depends_on:
+      - frontend
+    secrets:
+      - cloudflare-tunnel-token
+    environment:
+      TUNNEL_TOKEN_FILE: /run/secrets/cloudflare-tunnel-token
+    networks:
+      - wwb-internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+# ──────────────────────────────────────────────
+# Networks
+# ──────────────────────────────────────────────
+networks:
+  wwb-internal:
+    driver: overlay
+    attachable: true
+# ──────────────────────────────────────────────
+# Secrets — all supplied externally via Docker Swarm
+# Create with: docker secret create <name> <file>
+# ──────────────────────────────────────────────
+secrets:
+  mongo-root-password:
+    file: ./secrets/mongo-root-password.txt
+  mongo-database-password:
+    file: ./secrets/mongo-database-password.txt
+  mongo-express-password:
+    file: ./secrets/mongo-express-password.txt
+  jwt-secret:
+    file: ./secrets/jwt-secret.txt
+  cloudflare-tunnel-token:
+    file: ./secrets/cloudflare-tunnel-token.txt
+# ──────────────────────────────────────────────
+# Configs
+# ──────────────────────────────────────────────
+configs:
+  mongo-init:
+    file: ./configs/mongo/init.js
+  mongo-express-entrypoint:
+    file: ./configs/mongo-express/entrypoint.sh
+# ──────────────────────────────────────────────
+# Volumes
+# ──────────────────────────────────────────────
+volumes:
+  mongo-data:
+    driver: local

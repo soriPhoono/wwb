@@ -4,29 +4,29 @@ const products = [
     name: "Network Security Handbook",
     price: 29.99,
     category: "Books",
-    description: "A sample product for the secure e-commerce catalog."
+    description: "A sample product for the secure e-commerce catalog.",
   },
   {
     id: 2,
     name: "MFA Setup Guide",
     price: 19.99,
     category: "Guides",
-    description: "A beginner-friendly guide to multifactor authentication."
+    description: "A beginner-friendly guide to multifactor authentication.",
   },
   {
     id: 3,
     name: "Secure Checkout Toolkit",
     price: 39.99,
     category: "Software",
-    description: "A demo toolkit representing checkout protection resources."
+    description: "A demo toolkit representing checkout protection resources.",
   },
   {
     id: 4,
     name: "Privacy Protection Bundle",
     price: 24.99,
     category: "Bundles",
-    description: "A bundle representing privacy and security support items."
-  }
+    description: "A bundle representing privacy and security support items.",
+  },
 ];
 
 function setCookie(name, value, days) {
@@ -69,10 +69,10 @@ function loadCart() {
 let cart = loadCart();
 
 function addToCart(productId) {
-  const product = products.find(item => item.id === productId);
+  const product = products.find((item) => item.id === productId);
   if (!product) return;
 
-  const existingItem = cart.find(item => item.id === productId);
+  const existingItem = cart.find((item) => item.id === productId);
 
   if (existingItem) {
     existingItem.quantity += 1;
@@ -81,7 +81,7 @@ function addToCart(productId) {
       id: product.id,
       name: product.name,
       price: product.price,
-      quantity: 1
+      quantity: 1,
     });
   }
 
@@ -90,13 +90,13 @@ function addToCart(productId) {
 }
 
 function removeFromCart(productId) {
-  cart = cart.filter(item => item.id !== productId);
+  cart = cart.filter((item) => item.id !== productId);
   saveCart(cart);
   renderCart();
 }
 
 function updateQuantity(productId, change) {
-  const item = cart.find(product => product.id === productId);
+  const item = cart.find((product) => product.id === productId);
   if (!item) return;
 
   item.quantity += change;
@@ -130,7 +130,7 @@ function renderCart() {
   if (cart.length === 0) {
     cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
   } else {
-    cart.forEach(item => {
+    cart.forEach((item) => {
       const cartItem = document.createElement("div");
       cartItem.className = "cart-item";
       cartItem.innerHTML = `
@@ -159,7 +159,7 @@ function renderProducts() {
 
   productContainer.innerHTML = "";
 
-  products.forEach(product => {
+  products.forEach((product) => {
     const productCard = document.createElement("article");
     productCard.className = "product-card";
     productCard.innerHTML = `

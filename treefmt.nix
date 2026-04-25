@@ -6,6 +6,8 @@ _: {
     deadnix.enable = true;
     statix.enable = true;
 
+    prettier.enable = true;
+
     yamlfmt.enable = true;
 
     mdformat.enable = true;

@@ -14,6 +14,8 @@ with pkgs;
       ssh-to-age
       sops
 
+      nodejs
+
       (python3.withPackages (ps:
         with ps; [
           ansible-core

@@ -1,0 +1,38 @@
+services:
+  swarm-cd:
+    image: ghcr.io/m-adawi/swarm-cd:latest
+    configs:
+      - source: swarm-cd_config
+        target: /app/config.yml
+        mode: 400
+      - source: swarm-cd_repos
+        target: /app/repos.yaml
+        mode: 400
+      - source: swarm-cd_stacks
+        target: /app/stacks.yaml
+        mode: 400
+    secrets:
+      - cluster-key
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      SOPS_AGE_KEY_FILE: /run/secrets/cluster-key
+      DOMAIN_NAME: cryptic-coders.net
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+configs:
+  swarm-cd_config:
+    file: ./configs/config.yml
+  swarm-cd_repos:
+    file: ./configs/repos.yml
+  swarm-cd_stacks:
+    file: ./configs/stacks.yml
+secrets:
+  cluster-key:
+    file: ./secrets/keys.txt
