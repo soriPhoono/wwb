@@ -5,12 +5,15 @@ import { connectDB } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import cartRoutes from "./routes/cart.js";
 import adminRoutes from "./routes/admin.js";
+import { initializeAdmin } from "./services/init.js";
 
 const app = express();
 const PORT = process.env.API_PORT || 3000;
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(() => {
+  initializeAdmin();
+});
 
 // Middleware
 app.use(

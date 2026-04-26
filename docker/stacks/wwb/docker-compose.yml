@@ -73,9 +73,13 @@ services:
       - twilio-account-sid
       - twilio-auth-token
       - twilio-verify-service-sid
+      - admin-email
+      - admin-password
     environment:
       NODE_ENV: production
       API_PORT: 3000
+      DEFAULT_ADMIN_EMAIL_FILE: /run/secrets/admin-email
+      DEFAULT_ADMIN_PASSWORD_FILE: /run/secrets/admin-password
       MONGO_URI: mongodb://wwb-service:{PASSWORD}@wwb_mongo:27017/wwb-db?authSource=wwb-db
       MONGO_PASSWORD_FILE: /run/secrets/mongo-database-password
       JWT_SECRET_FILE: /run/secrets/jwt-secret
@@ -158,6 +162,10 @@ secrets:
     file: ./secrets/twilio-verify-service-sid.txt
   cloudflare-tunnel-token:
     file: ./secrets/cloudflare-tunnel-token.txt
+  admin-email:
+    file: ./secrets/admin-email.txt
+  admin-password:
+    file: ./secrets/admin-password.txt
 # ──────────────────────────────────────────────
 # Configs
 # ──────────────────────────────────────────────
