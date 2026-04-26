@@ -158,11 +158,13 @@ function formatDate(dateStr) {
   >
     <div class="max-w-2xl mx-auto space-y-8">
       <!-- Page heading -->
-      <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 m-0">
+      <div class="mb-10">
+        <h1
+          class="text-4xl font-black text-slate-900 m-0 tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-transparent"
+        >
           Account Settings
         </h1>
-        <p class="text-slate-500 mt-1 m-0">
+        <p class="text-slate-500 mt-2 m-0 text-lg">
           Manage your profile and security settings
         </p>
       </div>
