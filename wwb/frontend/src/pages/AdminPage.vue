@@ -175,46 +175,76 @@ onMounted(fetchData);
 .admin-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
-  min-height: 80vh;
+  padding: 60px 20px;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(59, 130, 246, 0.15),
+      transparent 400px
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(139, 92, 246, 0.15),
+      transparent 400px
+    );
 }
 
 .admin-header {
-  margin-bottom: 40px;
+  margin-bottom: 60px;
   text-align: center;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-header h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 10px;
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
   background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .admin-header p {
   color: #94a3b8;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .card {
-  border-radius: 24px;
-  padding: 24px;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 28px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
 }
 
 .glass {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .admin-controls {
   display: flex;
   gap: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
   align-items: center;
+  padding: 16px 24px;
+  background: rgba(15, 23, 42, 0.3);
 }
 
 .search-box {
@@ -225,87 +255,113 @@ onMounted(fetchData);
   width: 100%;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: 14px 24px;
+  border-radius: 16px;
   color: white;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .search-input:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.2),
+    0 0 20px rgba(59, 130, 246, 0.2);
+  transform: scale(1.01);
 }
 
 .refresh-btn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #2563eb;
   transform: translateY(-2px);
-}
-
-.refresh-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
 }
 
 .users-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 30px;
 }
 
 .user-card {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  transition:
-    transform 0.3s ease,
-    border-color 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.user-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .user-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+}
+
+.user-card:hover::before {
+  opacity: 1;
 }
 
 .user-info {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
 }
 
 .user-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 900;
   color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  flex-shrink: 0;
 }
 
 .user-email {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f8fafc;
   word-break: break-all;
 }
 
-.user-id,
+.user-id {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-family: monospace;
+}
+
 .user-date {
   margin: 4px 0 0;
   font-size: 0.85rem;
@@ -314,25 +370,37 @@ onMounted(fetchData);
 
 .role-management {
   display: flex;
-  gap: 16px;
-  padding: 16px;
-  background: rgba(15, 23, 42, 0.4);
-  border-radius: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .role-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+  color: #cbd5e1;
+}
+
+.role-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
 }
 
 .role-toggle input {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
+  accent-color: #3b82f6;
 }
 
 .user-actions {
@@ -341,19 +409,21 @@ onMounted(fetchData);
 
 .delete-btn {
   width: 100%;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.2);
-  padding: 10px;
-  border-radius: 12px;
-  font-weight: 600;
+  padding: 12px;
+  border-radius: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .delete-btn:hover:not(:disabled) {
   background: #ef4444;
   color: white;
+  transform: scale(1.02);
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
 }
 
 .delete-btn:disabled {
