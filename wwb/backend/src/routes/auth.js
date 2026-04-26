@@ -324,29 +324,36 @@ router.patch("/profile", requireAuth, async (req, res) => {
     }
 
     // Handle phone change
-    const newPhone = normalizePhoneNumber(phone);
+    const newPhone = normalizePhoneNumber(phone) || null;
     if (newPhone !== user.phone) {
-      // Store as pending and require verification
-      user.pendingPhone = newPhone;
-      user.email = normalizedEmail; // Save email change too if present
-      await user.save();
+      if (newPhone) {
+        // Store as pending and require verification
+        user.pendingPhone = newPhone;
+        user.email = normalizedEmail; // Save email change too if present
+        await user.save();
 
-      try {
-        await sendVerificationCode(newPhone);
-        const mfaToken = signMfaToken(user._id, "profile_update");
-        const masked =
-          newPhone.slice(0, -4).replace(/./g, "*") + newPhone.slice(-4);
+        try {
+          await sendVerificationCode(newPhone);
+          const mfaToken = signMfaToken(user._id, "profile_update");
+          const masked =
+            newPhone.slice(0, -4).replace(/./g, "*") + newPhone.slice(-4);
 
-        return res.json({
-          mfaRequired: true,
-          mfaToken,
-          phoneMasked: masked,
-        });
-      } catch (twilioErr) {
-        console.error("Twilio send error during profile update:", twilioErr);
-        return res.status(502).json({
-          error: "Failed to send verification code. Please try again.",
-        });
+          return res.json({
+            mfaRequired: true,
+            mfaToken,
+            phoneMasked: masked,
+          });
+        } catch (twilioErr) {
+          console.error("Twilio send error during profile update:", twilioErr);
+          return res.status(502).json({
+            error: "Failed to send verification code. Please try again.",
+          });
+        }
+      } else {
+        // Removing phone number entirely — no verification needed for removal
+        user.phone = null;
+        user.pendingPhone = null;
+        user.mfaEnabled = false;
       }
     }
 
