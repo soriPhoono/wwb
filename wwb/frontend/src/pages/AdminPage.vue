@@ -32,6 +32,19 @@ async function fetchData() {
 
 // Toggle role for a user
 async function toggleRole(user, role) {
+  // Prevent self-demotion check on frontend for better UX
+  if (role === "admin" && user._id === currentUser.value?._id) {
+    alert(
+      "Safety Check: You cannot remove your own administrator permissions.",
+    );
+    // Force Vue to re-render the checkbox by triggering a reactive update
+    const index = users.value.findIndex((u) => u._id === user._id);
+    if (index !== -1) {
+      users.value[index] = { ...users.value[index] };
+    }
+    return;
+  }
+
   const newRoles = user.roles.includes(role)
     ? user.roles.filter((r) => r !== role)
     : [...user.roles, role];
@@ -45,6 +58,11 @@ async function toggleRole(user, role) {
 
     if (!res.ok) {
       const data = await res.json();
+      // Force refresh on failure to ensure UI matches DB
+      const index = users.value.findIndex((u) => u._id === user._id);
+      if (index !== -1) {
+        users.value[index] = { ...users.value[index] };
+      }
       throw new Error(data.error || "Failed to update roles");
     }
 
@@ -53,6 +71,8 @@ async function toggleRole(user, role) {
     if (index !== -1) users.value[index] = updatedUser;
   } catch (err) {
     alert(err.message);
+    // Final fallback: re-fetch to be absolutely sure
+    fetchData();
   }
 }
 
@@ -146,7 +166,7 @@ onMounted(fetchData);
             <input
               type="checkbox"
               :checked="user.roles.includes(role.id)"
-              @change="toggleRole(user, role.id)"
+              @click.prevent="toggleRole(user, role.id)"
               :disabled="role.id === 'admin' && user._id === currentUser?._id"
             />
             <span class="toggle-label">{{ role.name }}</span>
