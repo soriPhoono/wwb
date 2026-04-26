@@ -18,9 +18,14 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    github-actions-nix = {
+      url = "github:synapdeck/github-actions-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
+    self,
     flake-parts,
     nixpkgs,
     ...
@@ -35,6 +40,7 @@
         agenix-shell.flakeModules.default
         treefmt-nix.flakeModule
         git-hooks-nix.flakeModule
+        github-actions-nix.flakeModule
       ];
 
       inherit systems;
@@ -60,13 +66,14 @@
         devShells.default = import ./shell.nix {
           inherit lib pkgs;
           config = {
-            inherit (config) pre-commit agenix-shell;
+            inherit (config) pre-commit agenix-shell githubActions;
           };
         };
 
         # --- Configuration Builders --- #
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
+        githubActions = import ./actions.nix {inherit self lib;};
 
         # --- Deployment ---
         apps = rec {
@@ -116,11 +123,11 @@
                   --tag wwb-frontend:latest \
                   "${./wwb/frontend}"
 
-                # echo "==> Deploying ecom stack..."
-                # ECOM_DIR="$(git rev-parse --show-toplevel)/docker/clusters/ecom"
-                # docker stack deploy \
-                #   --compose-file "$ECOM_DIR/docker-compose.yml" \
-                #   ecom
+                echo "==> Deploying ecom stack..."
+                ECOM_DIR="$(git rev-parse --show-toplevel)/docker/clusters/ecom"
+                docker stack deploy \
+                  --compose-file "$ECOM_DIR/docker-compose.yml" \
+                  ecom
               '';
             });
           };
