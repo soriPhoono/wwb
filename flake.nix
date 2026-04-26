@@ -77,52 +77,12 @@
 
         # --- Deployment ---
         apps = rec {
-          build-backend = {
-            type = "app";
-            program = lib.getExe (pkgs.writeShellApplication {
-              name = "build-backend";
-              runtimeInputs = [pkgs.docker];
-              text = ''
-                docker build \
-                  --network=host \
-                  --tag wwb-backend:latest \
-                  "${./wwb/backend}"
-              '';
-            });
-          };
-
-          build-frontend = {
-            type = "app";
-            program = lib.getExe (pkgs.writeShellApplication {
-              name = "build-frontend";
-              runtimeInputs = [pkgs.docker];
-              text = ''
-                docker build \
-                  --network=host \
-                  --tag wwb-frontend:latest \
-                  "${./wwb/frontend}"
-              '';
-            });
-          };
-
           deploy-ecom = {
             type = "app";
             program = lib.getExe (pkgs.writeShellApplication {
               name = "deploy-ecom";
               runtimeInputs = with pkgs; [docker git];
               text = ''
-                echo "==> Building wwb-backend image..."
-                docker build \
-                  --network=host \
-                  --tag wwb-backend:latest \
-                  "${./wwb/backend}"
-
-                echo "==> Building wwb-frontend image..."
-                docker build \
-                  --network=host \
-                  --tag wwb-frontend:latest \
-                  "${./wwb/frontend}"
-
                 echo "==> Deploying ecom stack..."
                 ECOM_DIR="$(git rev-parse --show-toplevel)/docker/clusters/ecom"
                 docker stack deploy \

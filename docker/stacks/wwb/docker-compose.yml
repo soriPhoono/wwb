@@ -64,9 +64,7 @@ services:
   # Backend — Express + Node.js API
   # ──────────────────────────────────────────────
   backend:
-    image: wwb-backend:latest
-    build:
-      context: ../../../wwb/backend
+    image: ghcr.io/soriphoono/wwb-backend:latest
     depends_on:
       - mongo
     secrets:
@@ -97,9 +95,7 @@ services:
   # Caddy proxies /api/* → backend:3000
   # ──────────────────────────────────────────────
   frontend:
-    image: wwb-frontend:latest
-    build:
-      context: ../../../wwb/frontend
+    image: ghcr.io/soriphoono/wwb-frontend:latest
     depends_on:
       - backend
     networks:
