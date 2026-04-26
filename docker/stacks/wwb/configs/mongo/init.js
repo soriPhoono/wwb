@@ -9,8 +9,8 @@ print("### Initializing database: " + dbName + " ###");
 
 // Ensure the database exists by creating a temporary collection and document
 targetDb.init_metadata.insertOne({
-    created_at: new Date(),
-    status: "initialized",
+  created_at: new Date(),
+  status: "initialized",
 });
 
 print("### Database initialized and metadata record created. ###");
@@ -21,32 +21,34 @@ const passwordFile = process.env.MONGO_INITDB_DATABASE_PASSWORD_FILE;
 
 let userPassword = "";
 if (passwordFile) {
-    try {
-        userPassword = fs.readFileSync(passwordFile, 'utf8').trim();
-    } catch (e) {
-        print("### Error reading password file: " + e + " ###");
-    }
+  try {
+    userPassword = fs.readFileSync(passwordFile, "utf8").trim();
+  } catch (e) {
+    print("### Error reading password file: " + e + " ###");
+  }
 }
 
 if (userPassword) {
-    const userExists = targetDb.getUser(userName);
+  const userExists = targetDb.getUser(userName);
 
-    if (!userExists) {
-        print("### Creating user: " + userName + " ###");
-        targetDb.createUser({
-            user: userName,
-            pwd: userPassword,
-            roles: [
-                { role: "readWrite", db: dbName },
-                { role: "dbAdmin", db: dbName },
-            ],
-        });
-        print("### User " + userName + " created successfully. ###");
-    } else {
-        print("### User " + userName + " already exists. ###");
-    }
+  if (!userExists) {
+    print("### Creating user: " + userName + " ###");
+    targetDb.createUser({
+      user: userName,
+      pwd: userPassword,
+      roles: [
+        { role: "readWrite", db: dbName },
+        { role: "dbAdmin", db: dbName },
+      ],
+    });
+    print("### User " + userName + " created successfully. ###");
+  } else {
+    print("### User " + userName + " already exists. ###");
+  }
 } else {
-    print("### WARNING: Database password not found, skipping user creation. ###");
+  print(
+    "### WARNING: Database password not found, skipping user creation. ###",
+  );
 }
 
 print("### Seed script execution complete. ###");

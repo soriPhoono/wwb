@@ -1,98 +1,296 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const { requireAuth, getJwtSecret } = require('../middleware/auth');
+import { Router } from "express";
+import { hash, compare } from "bcryptjs";
+import jsonwebtoken from "jsonwebtoken";
+import User from "../models/User.js";
+import { requireAuth, getJwtSecret } from "../middleware/auth.js";
+import {
+  sendVerificationCode,
+  checkVerificationCode,
+} from "../services/twilio.js";
 
-const router = express.Router();
+const { sign, verify } = jsonwebtoken;
+const router = Router();
 
 const COOKIE_OPTS = {
   httpOnly: true,
-  sameSite: 'lax',
+  sameSite: "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-  // secure: true, // Uncomment in production (requires HTTPS)
+  secure: true, // Should be true in production (requires HTTPS)
 };
 
 function signToken(userId) {
-  return jwt.sign({ userId: userId.toString() }, getJwtSecret(), { expiresIn: '7d' });
+  return sign({ userId: userId.toString() }, getJwtSecret(), {
+    expiresIn: "7d",
+  });
+}
+
+/**
+ * Create a short-lived token that proves the user passed step 1 (password)
+ * but still needs to complete MFA. Contains a `mfaPending` flag so it
+ * cannot be confused with a real session token.
+ */
+function signMfaToken(userId) {
+  return sign({ userId: userId.toString(), mfaPending: true }, getJwtSecret(), {
+    expiresIn: "10m",
+  });
 }
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post("/register", async (req, res) => {
   const { email, password, phone } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' });
+    return res.status(400).json({ error: "Email and password are required." });
   }
   if (password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 8 characters." });
   }
 
   try {
     const existing = await User.findOne({ email: email.toLowerCase().trim() });
     if (existing) {
-      return res.status(409).json({ error: 'An account with that email already exists.' });
+      return res
+        .status(409)
+        .json({ error: "An account with that email already exists." });
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await hash(password, 12);
     const user = await User.create({
       email,
       passwordHash,
-      phone: phone?.trim() || null,
+      mfaEnabled: !!phone?.trim(),
+      phone: phone?.trim(),
     });
 
     const token = signToken(user._id);
-    res.cookie('token', token, COOKIE_OPTS);
+    res.cookie("token", token, COOKIE_OPTS);
     return res.status(201).json({ user: user.toSafeObject() });
   } catch (err) {
-    console.error('Register error:', err);
-    return res.status(500).json({ error: 'Server error. Please try again.' });
+    console.error("Register error:", err);
+    return res.status(500).json({ error: "Server error. Please try again." });
   }
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' });
+    return res.status(400).json({ error: "Email and password are required." });
   }
 
   try {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await compare(password, user.passwordHash);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: "Invalid email or password." });
     }
 
+    // ── MFA challenge ──────────────────────────────────────────────────
+    if (user.mfaEnabled && user.phone) {
+      try {
+        await sendVerificationCode(user.phone);
+      } catch (twilioErr) {
+        console.error("Twilio send error:", twilioErr);
+        return res
+          .status(502)
+          .json({ error: "Failed to send verification code. Try again." });
+      }
+
+      const mfaToken = signMfaToken(user._id);
+
+      // Mask phone: "+1555123****"
+      const masked =
+        user.phone.slice(0, -4).replace(/./g, "*") + user.phone.slice(-4);
+
+      return res.json({ mfaRequired: true, mfaToken, phoneMasked: masked });
+    }
+
+    // ── Normal login (no MFA) ──────────────────────────────────────────
     const token = signToken(user._id);
-    res.cookie('token', token, COOKIE_OPTS);
+    res.cookie("token", token, COOKIE_OPTS);
     return res.json({ user: user.toSafeObject() });
   } catch (err) {
-    console.error('Login error:', err);
-    return res.status(500).json({ error: 'Server error. Please try again.' });
+    console.error("Login error:", err);
+    return res.status(500).json({ error: "Server error. Please try again." });
+  }
+});
+
+// POST /api/auth/mfa/verify  — complete the MFA challenge
+router.post("/mfa/verify", async (req, res) => {
+  const { mfaToken, code } = req.body;
+
+  if (!mfaToken || !code) {
+    return res
+      .status(400)
+      .json({ error: "MFA token and verification code are required." });
+  }
+
+  // 1. Validate the MFA token
+  let payload;
+  try {
+    payload = verify(mfaToken, getJwtSecret());
+  } catch (err) {
+    return res
+      .status(401)
+      .json({ error: "MFA session expired. Please log in again." });
+  }
+
+  if (!payload.mfaPending) {
+    return res.status(401).json({ error: "Invalid MFA token." });
+  }
+
+  // 2. Look up the user
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  // 3. Check the code with Twilio Verify
+  try {
+    const approved = await checkVerificationCode(user.phone, code);
+    if (!approved) {
+      return res.status(401).json({ error: "Incorrect verification code." });
+    }
+  } catch (twilioErr) {
+    console.error("Twilio verify error:", twilioErr);
+    return res
+      .status(502)
+      .json({ error: "Verification service error. Try again." });
+  }
+
+  // 4. MFA passed — issue the real session
+  const token = signToken(user._id);
+  res.cookie("token", token, COOKIE_OPTS);
+  return res.json({ user: user.toSafeObject() });
+});
+
+// POST /api/auth/mfa/resend  — resend the verification code
+router.post("/mfa/resend", async (req, res) => {
+  const { mfaToken } = req.body;
+
+  if (!mfaToken) {
+    return res.status(400).json({ error: "MFA token is required." });
+  }
+
+  let payload;
+  try {
+    payload = verify(mfaToken, getJwtSecret());
+  } catch (err) {
+    return res
+      .status(401)
+      .json({ error: "MFA session expired. Please log in again." });
+  }
+
+  if (!payload.mfaPending) {
+    return res.status(401).json({ error: "Invalid MFA token." });
+  }
+
+  const user = await User.findById(payload.userId);
+  if (!user || !user.phone) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  try {
+    await sendVerificationCode(user.phone);
+    return res.json({ message: "Verification code resent." });
+  } catch (twilioErr) {
+    console.error("Twilio resend error:", twilioErr);
+    return res.status(502).json({ error: "Failed to resend code. Try again." });
   }
 });
 
 // POST /api/auth/logout
-router.post('/logout', (req, res) => {
-  res.clearCookie('token');
-  return res.json({ message: 'Logged out.' });
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  return res.json({ message: "Logged out." });
 });
 
 // GET /api/auth/me  — hydrates session on frontend load
-router.get('/me', requireAuth, async (req, res) => {
+router.get("/me", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    if (!user) return res.status(404).json({ error: "User not found." });
     return res.json({ user: user.toSafeObject() });
   } catch (err) {
-    return res.status(500).json({ error: 'Server error.' });
+    return res.status(500).json({ error: "Server error." });
   }
 });
 
-module.exports = router;
+// PATCH /api/auth/profile  — update email and/or phone
+router.patch("/profile", requireAuth, async (req, res) => {
+  const { email, phone } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required." });
+  }
+
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check uniqueness if email changed
+    if (normalizedEmail !== user.email) {
+      const existing = await User.findOne({ email: normalizedEmail });
+      if (existing) {
+        return res
+          .status(409)
+          .json({ error: "An account with that email already exists." });
+      }
+    }
+
+    user.email = normalizedEmail;
+    user.phone = phone?.trim() || null;
+    user.mfaEnabled = !!user.phone;
+    await user.save();
+
+    return res.json({ user: user.toSafeObject() });
+  } catch (err) {
+    console.error("Profile update error:", err);
+    return res.status(500).json({ error: "Server error. Please try again." });
+  }
+});
+
+// POST /api/auth/change-password  — change password (requires current password)
+router.post("/change-password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res
+      .status(400)
+      .json({ error: "Current password and new password are required." });
+  }
+  if (newPassword.length < 8) {
+    return res
+      .status(400)
+      .json({ error: "New password must be at least 8 characters." });
+  }
+
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    const valid = await compare(currentPassword, user.passwordHash);
+    if (!valid) {
+      return res.status(401).json({ error: "Current password is incorrect." });
+    }
+
+    user.passwordHash = await hash(newPassword, 12);
+    await user.save();
+
+    return res.json({ message: "Password updated successfully." });
+  } catch (err) {
+    console.error("Change password error:", err);
+    return res.status(500).json({ error: "Server error. Please try again." });
+  }
+});
+
+export default router;

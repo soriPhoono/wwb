@@ -46,7 +46,7 @@ services:
       - mongo-express-password
     environment:
       ME_CONFIG_SITE_BASEURL: /db
-      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_SERVER: wwb_mongo
       ME_CONFIG_MONGODB_PORT: "27017"
       ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
@@ -75,7 +75,7 @@ services:
     environment:
       NODE_ENV: production
       API_PORT: "3000"
-      MONGO_URI: mongodb://wwb-service:{PASSWORD}@mongo:27017/wwb-db?authSource=admin
+      MONGO_URI: mongodb://wwb-service:{PASSWORD}@wwb_mongo:27017/wwb-db?authSource=wwb-db
       MONGO_PASSWORD_FILE: /run/secrets/mongo-database-password
       JWT_SECRET_FILE: /run/secrets/jwt-secret
       FRONTEND_ORIGIN: https://wwb.${DOMAIN_NAME}
@@ -131,9 +131,13 @@ networks:
   wwb-internal:
     driver: overlay
     attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: "1200"
 # ──────────────────────────────────────────────
 # Secrets — all supplied externally via Docker Swarm
-# Create with: docker secret create <name> <file>
+#
+# NOTE: secrets are loaded from files under ./secrets/
+# named conventionally based on the purpose of the secret.
 # ──────────────────────────────────────────────
 secrets:
   mongo-root-password:

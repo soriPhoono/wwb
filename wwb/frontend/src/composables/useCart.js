@@ -1,34 +1,34 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch } from "vue";
 
 // Pre-defined static products array (could be moved to a separate file or fetched from backend later)
 export const products = [
   {
     id: 1,
-    name: 'Network Security Handbook',
+    name: "Network Security Handbook",
     price: 29.99,
-    category: 'Books',
-    description: 'A sample product for the secure e-commerce catalog.',
+    category: "Books",
+    description: "A sample product for the secure e-commerce catalog.",
   },
   {
     id: 2,
-    name: 'MFA Setup Guide',
+    name: "MFA Setup Guide",
     price: 19.99,
-    category: 'Guides',
-    description: 'A beginner-friendly guide to multifactor authentication.',
+    category: "Guides",
+    description: "A beginner-friendly guide to multifactor authentication.",
   },
   {
     id: 3,
-    name: 'Secure Checkout Toolkit',
+    name: "Secure Checkout Toolkit",
     price: 39.99,
-    category: 'Software',
-    description: 'A demo toolkit representing checkout protection resources.',
+    category: "Software",
+    description: "A demo toolkit representing checkout protection resources.",
   },
   {
     id: 4,
-    name: 'Privacy Protection Bundle',
+    name: "Privacy Protection Bundle",
     price: 24.99,
-    category: 'Bundles',
-    description: 'A bundle representing privacy and security support items.',
+    category: "Bundles",
+    description: "A bundle representing privacy and security support items.",
   },
 ];
 
@@ -36,14 +36,14 @@ export const products = [
 function setCookie(name, value, days) {
   const date = new Date();
   date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  const expires = 'expires=' + date.toUTCString();
+  const expires = "expires=" + date.toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)};${expires};path=/;SameSite=Lax`;
 }
 
 function getCookie(name) {
-  const cookieName = name + '=';
+  const cookieName = name + "=";
   const decodedCookie = decodeURIComponent(document.cookie);
-  const cookieArray = decodedCookie.split(';');
+  const cookieArray = decodedCookie.split(";");
 
   for (let i = 0; i < cookieArray.length; i++) {
     let cookie = cookieArray[i].trim();
@@ -51,7 +51,7 @@ function getCookie(name) {
       return cookie.substring(cookieName.length, cookie.length);
     }
   }
-  return '';
+  return "";
 }
 
 // Global cart state singleton so multiple components share it
@@ -59,20 +59,24 @@ const cart = ref([]);
 const isCartOpen = ref(false);
 
 // Initialize cart from cookie once
-const cartData = getCookie('shoppingCart');
+const cartData = getCookie("shoppingCart");
 if (cartData) {
   try {
     cart.value = JSON.parse(cartData);
   } catch (error) {
-    console.error('Could not parse shopping cart cookie:', error);
+    console.error("Could not parse shopping cart cookie:", error);
     cart.value = [];
   }
 }
 
 // Watcher to save to cookie automatically whenever the cart changes
-watch(cart, (newCart) => {
-  setCookie('shoppingCart', JSON.stringify(newCart), 7);
-}, { deep: true });
+watch(
+  cart,
+  (newCart) => {
+    setCookie("shoppingCart", JSON.stringify(newCart), 7);
+  },
+  { deep: true },
+);
 
 export function useCart() {
   const addToCart = (productId) => {
@@ -113,7 +117,10 @@ export function useCart() {
   };
 
   const cartTotal = computed(() => {
-    return cart.value.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.value.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0,
+    );
   });
 
   const cartCount = computed(() => {
@@ -128,6 +135,6 @@ export function useCart() {
     updateQuantity,
     toggleCart,
     cartTotal,
-    cartCount
+    cartCount,
   };
 }
