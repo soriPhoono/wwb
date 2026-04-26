@@ -72,13 +72,19 @@ services:
     secrets:
       - mongo-database-password
       - jwt-secret
+      - twilio-account-sid
+      - twilio-auth-token
+      - twilio-verify-service-sid
     environment:
       NODE_ENV: production
-      API_PORT: "3000"
+      API_PORT: 3000
       MONGO_URI: mongodb://wwb-service:{PASSWORD}@wwb_mongo:27017/wwb-db?authSource=wwb-db
       MONGO_PASSWORD_FILE: /run/secrets/mongo-database-password
       JWT_SECRET_FILE: /run/secrets/jwt-secret
       FRONTEND_ORIGIN: https://wwb.${DOMAIN_NAME}
+      TWILIO_ACCOUNT_SID_FILE: /run/secrets/twilio-account-sid
+      TWILIO_AUTH_TOKEN_FILE: /run/secrets/twilio-auth-token
+      TWILIO_VERIFY_SERVICE_SID_FILE: /run/secrets/twilio-verify-service-sid
     networks:
       - wwb-internal
     deploy:
@@ -148,6 +154,12 @@ secrets:
     file: ./secrets/mongo-express-password.txt
   jwt-secret:
     file: ./secrets/jwt-secret.txt
+  twilio-account-sid:
+    file: ./secrets/twilio-account-sid.txt
+  twilio-auth-token:
+    file: ./secrets/twilio-auth-token.txt
+  twilio-verify-service-sid:
+    file: ./secrets/twilio-verify-service-sid.txt
   cloudflare-tunnel-token:
     file: ./secrets/cloudflare-tunnel-token.txt
 # ──────────────────────────────────────────────

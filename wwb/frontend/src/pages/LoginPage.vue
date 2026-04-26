@@ -291,7 +291,7 @@ function handleBack() {
                 autocomplete="one-time-code"
                 maxlength="6"
                 placeholder="000000"
-                class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm text-center tracking-[0.5em] font-mono text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition placeholder:text-slate-400 placeholder:tracking-[0.5em]"
+                class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition placeholder:text-slate-400 placeholder:tracking-[0.5em]"
               />
             </div>
 

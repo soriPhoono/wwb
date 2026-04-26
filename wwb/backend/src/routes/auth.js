@@ -37,6 +37,7 @@ function signMfaToken(userId) {
 
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
+  // Get body of request (user)
   const { email, password, phone } = req.body;
 
   if (!email || !password) {
@@ -49,6 +50,7 @@ router.post("/register", async (req, res) => {
   }
 
   try {
+    // Check if user already exists
     const existing = await User.findOne({ email: email.toLowerCase().trim() });
     if (existing) {
       return res
@@ -56,7 +58,10 @@ router.post("/register", async (req, res) => {
         .json({ error: "An account with that email already exists." });
     }
 
+    // Hash the password
     const passwordHash = await hash(password, 12);
+
+    // Create new user
     const user = await User.create({
       email,
       passwordHash,
@@ -64,11 +69,17 @@ router.post("/register", async (req, res) => {
       phone: phone?.trim(),
     });
 
+    // Create token and cookie for user
     const token = signToken(user._id);
     res.cookie("token", token, COOKIE_OPTS);
+
+    // Return user
     return res.status(201).json({ user: user.toSafeObject() });
   } catch (err) {
+    // Log error
     console.error("Register error:", err);
+
+    // Return error
     return res.status(500).json({ error: "Server error. Please try again." });
   }
 });
@@ -98,9 +109,9 @@ router.post("/login", async (req, res) => {
         await sendVerificationCode(user.phone);
       } catch (twilioErr) {
         console.error("Twilio send error:", twilioErr);
-        return res
-          .status(502)
-          .json({ error: "Failed to send verification code. Try again." });
+        return res.status(502).json({
+          error: "Failed to send verification code. Please try again.",
+        });
       }
 
       const mfaToken = signMfaToken(user._id);
