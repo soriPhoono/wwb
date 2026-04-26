@@ -30,9 +30,9 @@ function signToken(userId, roles = []) {
  * but still needs to complete MFA. Contains a `mfaPending` flag so it
  * cannot be confused with a real session token.
  */
-function signMfaToken(userId, context = "auth") {
+function signMfaToken(userId, context = "auth", metadata = {}) {
   return sign(
-    { userId: userId.toString(), mfaPending: true, context },
+    { userId: userId.toString(), mfaPending: true, context, ...metadata },
     getJwtSecret(),
     {
       expiresIn: "10m",
@@ -209,9 +209,9 @@ router.post("/mfa/verify", async (req, res) => {
   }
 
   // 3. Check the code with Twilio Verify
-  // Use pendingPhone if this is a profile update verification, otherwise use current phone
+  // Use phone from token if this is a profile update verification
   const phoneToVerify =
-    payload.context === "profile_update" ? user.pendingPhone : user.phone;
+    payload.context === "profile_update" ? payload.newPhone : user.phone;
 
   if (!phoneToVerify) {
     return res.status(400).json({ error: "No phone number to verify." });
@@ -231,9 +231,8 @@ router.post("/mfa/verify", async (req, res) => {
 
   // 4. Verification passed
   // If this was a profile update, "commit" the new phone number
-  if (payload.context === "profile_update" && user.pendingPhone) {
-    user.phone = user.pendingPhone;
-    user.pendingPhone = null;
+  if (payload.context === "profile_update" && payload.newPhone) {
+    user.phone = payload.newPhone;
     user.mfaEnabled = true;
     await user.save();
   }
@@ -267,7 +266,7 @@ router.post("/mfa/resend", async (req, res) => {
 
   const user = await User.findById(payload.userId);
   const phoneToResend =
-    payload.context === "profile_update" ? user?.pendingPhone : user?.phone;
+    payload.context === "profile_update" ? payload.newPhone : user?.phone;
 
   if (!user || !phoneToResend) {
     return res.status(404).json({ error: "User or phone number not found." });
@@ -327,14 +326,13 @@ router.patch("/profile", requireAuth, async (req, res) => {
     const newPhone = normalizePhoneNumber(phone) || null;
     if (newPhone !== user.phone) {
       if (newPhone) {
-        // Store as pending and require verification
-        user.pendingPhone = newPhone;
-        user.email = normalizedEmail; // Save email change too if present
-        await user.save();
-
+        // We no longer store pendingPhone in DB.
+        // Instead, we pass it in the MFA token so it's verified first.
         try {
           await sendVerificationCode(newPhone);
-          const mfaToken = signMfaToken(user._id, "profile_update");
+          const mfaToken = signMfaToken(user._id, "profile_update", {
+            newPhone,
+          });
           const masked =
             newPhone.slice(0, -4).replace(/./g, "*") + newPhone.slice(-4);
 
@@ -352,7 +350,6 @@ router.patch("/profile", requireAuth, async (req, res) => {
       } else {
         // Removing phone number entirely — no verification needed for removal
         user.phone = null;
-        user.pendingPhone = null;
         user.mfaEnabled = false;
       }
     }
