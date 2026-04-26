@@ -25,6 +25,10 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  roles: {
+    type: [String],
+    default: [],
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -44,6 +48,7 @@ userSchema.methods.toSafeObject = function () {
     email: this.email,
     phone: this.phone,
     mfaEnabled: this.mfaEnabled,
+    roles: this.roles,
     createdAt: this.createdAt,
   };
 };

@@ -19,8 +19,8 @@ const COOKIE_OPTS = {
   secure: true, // Should be true in production (requires HTTPS)
 };
 
-function signToken(userId) {
-  return sign({ userId: userId.toString() }, getJwtSecret(), {
+function signToken(userId, roles = []) {
+  return sign({ userId: userId.toString(), roles }, getJwtSecret(), {
     expiresIn: "7d",
   });
 }
@@ -111,7 +111,7 @@ router.post("/register", async (req, res) => {
     }
 
     // No phone provided — direct login
-    const token = signToken(user._id);
+    const token = signToken(user._id, user.roles);
     res.cookie("token", token, COOKIE_OPTS);
 
     // Return user
@@ -169,7 +169,7 @@ router.post("/login", async (req, res) => {
     // For now, we follow the rule: only verified phones allow MFA.
 
     // ── Normal login (no MFA) ──────────────────────────────────────────
-    const token = signToken(user._id);
+    const token = signToken(user._id, user.roles);
     res.cookie("token", token, COOKIE_OPTS);
     return res.json({ user: user.toSafeObject() });
   } catch (err) {
@@ -239,7 +239,7 @@ router.post("/mfa/verify", async (req, res) => {
   }
 
   // Issue the real session (or refresh it)
-  const token = signToken(user._id);
+  const token = signToken(user._id, user.roles);
   res.cookie("token", token, COOKIE_OPTS);
   return res.json({ user: user.toSafeObject() });
 });
