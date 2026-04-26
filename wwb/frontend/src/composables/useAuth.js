@@ -21,6 +21,15 @@ export function useAuth() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Registration failed.");
+
+    // Check if MFA challenge was returned
+    if (data.mfaRequired) {
+      mfaPending.value = true;
+      mfaToken.value = data.mfaToken;
+      mfaPhoneMasked.value = data.phoneMasked || "";
+      return null; // signal to the UI: show MFA step
+    }
+
     user.value = data.user;
     return data.user;
   }

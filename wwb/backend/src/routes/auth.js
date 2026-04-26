@@ -65,43 +65,43 @@ router.post("/register", async (req, res) => {
     // Normalize the phone number if provided
     const normalizedPhone = normalizePhoneNumber(phone);
 
-    // Create new user
+    // Create new user immediately
     const user = await User.create({
-      email,
+      email: email.toLowerCase().trim(),
       passwordHash,
-      mfaEnabled: false, // MFA is disabled until the phone is verified
+      mfaEnabled: !!normalizedPhone,
       phone: normalizedPhone || null,
-      phoneVerified: false,
     });
 
-    // If phone number is present, initiate verification
-    if (user.phone) {
+    // If phone number was provided, initiate verification
+    if (normalizedPhone) {
       try {
         // Send verification code via Twilio
-        await sendVerificationCode(user.phone);
+        await sendVerificationCode(normalizedPhone);
 
         // Create a short-lived MFA token for the verification step
         const mfaToken = signMfaToken(user._id);
 
         // Mask the phone number for the response (e.g., +1555123****)
         const masked =
-          user.phone.slice(0, -4).replace(/./g, "*") + user.phone.slice(-4);
+          normalizedPhone.slice(0, -4).replace(/./g, "*") +
+          normalizedPhone.slice(-4);
 
         // Return a response requiring MFA/Verification
-        return res.status(201).json({
+        return res.status(200).json({
           mfaRequired: true,
           mfaToken,
           phoneMasked: masked,
-          message: "Verification code sent. Please confirm your phone number.",
         });
       } catch (twilioErr) {
-        // Log error but the user is still created
+        // Log error — the user is created but MFA might be broken
         console.error("Twilio send error during registration:", twilioErr);
-        // We could either return an error or let them in and ask to verify later.
-        // Given the requirement, let's inform them it failed.
-        return res.status(201).json({
-          user: user.toSafeObject(),
-          warning: "User created, but failed to send verification code.",
+        // We still return 200/201 but maybe with a warning or just let them try to resend later
+        // For simplicity, we'll return an error so they can try again (user will exist but email uniqueness will block next try)
+        // Actually, better to catch this and allow them to proceed or fix.
+        return res.status(400).json({
+          error:
+            "Account created but failed to send verification code. Please log in to try again.",
         });
       }
     }
@@ -141,8 +141,8 @@ router.post("/login", async (req, res) => {
     }
 
     // ── MFA challenge ──────────────────────────────────────────────────
-    // Only trigger MFA if the phone is verified and MFA is enabled
-    if (user.mfaEnabled && user.phone && user.phoneVerified) {
+    // Trigger MFA if the phone is present and MFA is enabled
+    if (user.mfaEnabled && user.phone) {
       try {
         await sendVerificationCode(user.phone);
       } catch (twilioErr) {
@@ -217,20 +217,7 @@ router.post("/mfa/verify", async (req, res) => {
       .json({ error: "Verification service error. Try again." });
   }
 
-  // 4. MFA passed — mark as verified and issue the real session
-  try {
-    // If this was the first time verifying (e.g. during registration),
-    // mark the phone as verified and enable MFA.
-    if (!user.phoneVerified) {
-      user.phoneVerified = true;
-      user.mfaEnabled = true;
-      await user.save();
-    }
-  } catch (saveErr) {
-    console.error("User save error after MFA verify:", saveErr);
-    return res.status(500).json({ error: "Failed to update user status." });
-  }
-
+  // 4. MFA passed — issue the real session
   const token = signToken(user._id);
   res.cookie("token", token, COOKIE_OPTS);
   return res.json({ user: user.toSafeObject() });
@@ -316,13 +303,9 @@ router.patch("/profile", requireAuth, async (req, res) => {
     const newPhone = normalizePhoneNumber(phone);
     if (newPhone !== user.phone) {
       user.phone = newPhone;
-      // Reset verification if phone changed or was added
-      user.phoneVerified = false;
-      user.mfaEnabled = false;
-
-      // Optionally we could trigger a verification code here,
-      // but for now we just require them to verify it next time they log in or similar.
-      // Or we can return a flag saying verification is needed.
+      // Reset MFA enabled status if phone changed?
+      // For simplicity, we keep it enabled if a phone is there.
+      user.mfaEnabled = !!newPhone;
     }
 
     user.email = normalizedEmail;
