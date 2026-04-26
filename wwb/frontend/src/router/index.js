@@ -5,6 +5,7 @@ import HomePage from "../pages/HomePage.vue";
 import LoginPage from "../pages/LoginPage.vue";
 import RegisterPage from "../pages/RegisterPage.vue";
 import AccountPage from "../pages/AccountPage.vue";
+import AdminPage from "../pages/AdminPage.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomePage },
@@ -25,6 +26,12 @@ const routes = [
     name: "account",
     component: AccountPage,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin",
+    name: "admin",
+    component: AdminPage,
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
 ];
 
@@ -65,6 +72,14 @@ router.beforeEach(async (to, from) => {
   // Redirect unauthenticated users away from protected pages
   if (to.meta.requiresAuth && !isLoggedIn.value) {
     return { name: "login", query: { redirect: to.fullPath } };
+  }
+
+  // Redirect non-admins away from admin-only pages
+  if (to.meta.requiresAdmin) {
+    const { user } = useAuth();
+    if (!user.value?.roles?.includes("admin")) {
+      return { name: "home" };
+    }
   }
 });
 

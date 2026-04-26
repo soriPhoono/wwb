@@ -4,7 +4,7 @@ import { useAuth } from "../composables/useAuth";
 import UserMenu from "./UserMenu.vue";
 
 const { cartCount, toggleCart } = useCart();
-const { isLoggedIn } = useAuth();
+const { isLoggedIn, user } = useAuth();
 </script>
 
 <template>
@@ -46,6 +46,12 @@ const { isLoggedIn } = useAuth();
           to="/#about"
           class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
           >About</RouterLink
+        >
+        <RouterLink
+          v-if="user?.roles?.includes('admin')"
+          to="/admin"
+          class="text-amber-400 font-bold no-underline hover:text-amber-300 transition-colors"
+          >Admin</RouterLink
         >
       </nav>
 
