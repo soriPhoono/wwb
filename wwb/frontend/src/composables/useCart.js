@@ -1,4 +1,5 @@
 import { ref, computed, watch } from "vue";
+import { user } from "./useAuthState.js";
 
 // Pre-defined static products array (could be moved to a separate file or fetched from backend later)
 export const products = [
@@ -69,17 +70,109 @@ if (cartData) {
   }
 }
 
+// Internal flag to prevent sync loops during fetch/clear operations
+let isHydrating = false;
+
 // Watcher to save to cookie automatically whenever the cart changes
 watch(
   cart,
   (newCart) => {
     setCookie("shoppingCart", JSON.stringify(newCart), 7);
+
+    // If logged in and NOT currently hydrating from backend, sync to backend
+    if (user.value && !isHydrating) {
+      const { syncCart } = useCart();
+      syncCart();
+    }
   },
   { deep: true },
 );
 
+// Watch for user changes to handle login/logout transitions
+watch(
+  user,
+  async (newUser, oldUser) => {
+    if (newUser && !oldUser) {
+      // Login or session rehydration: fetch account cart
+      const { fetchCart } = useCart();
+      await fetchCart();
+    } else if (!newUser && oldUser) {
+      // Logout: flush cart
+      const { clearCart } = useCart();
+      clearCart();
+    }
+  },
+  { immediate: true }, // Handle initial app load rehydration
+);
+
+/**
+ * Hydrates a list of { productId, quantity } into full cart items
+ */
+function hydrateCart(simpleCart) {
+  return simpleCart
+    .map((item) => {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) return null;
+      return {
+        ...product,
+        quantity: item.quantity,
+      };
+    })
+    .filter(Boolean);
+}
+
+/**
+ * Simplifies the cart for backend storage
+ */
+function simplifyCart(fullCart) {
+  return fullCart.map((item) => ({
+    productId: item.id,
+    quantity: item.quantity,
+  }));
+}
+
 export function useCart() {
-  const addToCart = (productId) => {
+  const fetchCart = async () => {
+    try {
+      const res = await fetch("/api/cart", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        // Overwrite local cart with backend data
+        isHydrating = true;
+        cart.value = hydrateCart(data.cart);
+        // Reset flag after Vue has processed the change
+        setTimeout(() => {
+          isHydrating = false;
+        }, 0);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cart:", err);
+    }
+  };
+
+  const syncCart = async () => {
+    try {
+      await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ cart: simplifyCart(cart.value) }),
+      });
+    } catch (err) {
+      console.error("Failed to sync cart:", err);
+    }
+  };
+
+  const clearCart = () => {
+    isHydrating = true;
+    cart.value = [];
+    setCookie("shoppingCart", "[]", -1); // Clear cookie
+    setTimeout(() => {
+      isHydrating = false;
+    }, 0);
+  };
+
+  const addToCart = async (productId) => {
     const product = products.find((item) => item.id === productId);
     if (!product) return;
 
@@ -89,12 +182,11 @@ export function useCart() {
       existingItem.quantity += 1;
     } else {
       cart.value.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
+        ...product,
         quantity: 1,
       });
     }
+    // No explicit sync here; watcher handles it if we add logic there or call sync manually
   };
 
   const removeFromCart = (productId) => {
@@ -136,5 +228,8 @@ export function useCart() {
     toggleCart,
     cartTotal,
     cartCount,
+    fetchCart,
+    syncCart,
+    clearCart,
   };
 }

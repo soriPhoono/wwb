@@ -25,6 +25,12 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  cart: [
+    {
+      productId: { type: Number, required: true },
+      quantity: { type: Number, required: true, default: 1 },
+    },
+  ],
 });
 
 // Strip sensitive fields before sending to client

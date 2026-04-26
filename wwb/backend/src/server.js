@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./db.js";
 import authRoutes from "./routes/auth.js";
+import cartRoutes from "./routes/cart.js";
 
 const app = express();
 const PORT = process.env.API_PORT || 3000;
@@ -26,6 +27,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

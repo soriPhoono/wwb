@@ -1,8 +1,6 @@
 import { ref, computed } from "vue";
-
-// Global singleton auth state — mirrors useCart pattern
-const user = ref(null);
-const authLoading = ref(true); // true until fetchMe resolves on app load
+import { user, authLoading } from "./useAuthState.js";
+import { useCart } from "./useCart.js";
 
 // MFA challenge state
 const mfaPending = ref(false);
