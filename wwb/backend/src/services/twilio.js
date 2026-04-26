@@ -84,7 +84,7 @@ function getVerifyServiceSid() {
  * @param {string} phoneNumber - The raw phone number input from the user.
  * @returns {string} The normalized phone number in E.164 format.
  */
-function normalizePhoneNumber(phoneNumber) {
+export function normalizePhoneNumber(phoneNumber) {
   // If the phone number is empty, return it as-is
   if (!phoneNumber) return phoneNumber;
 

@@ -17,6 +17,10 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
+  phoneVerified: {
+    type: Boolean,
+    default: false,
+  },
   mfaEnabled: {
     type: Boolean,
     default: false,
@@ -33,6 +37,7 @@ userSchema.methods.toSafeObject = function () {
     id: this._id,
     email: this.email,
     phone: this.phone,
+    phoneVerified: this.phoneVerified,
     mfaEnabled: this.mfaEnabled,
     createdAt: this.createdAt,
   };
