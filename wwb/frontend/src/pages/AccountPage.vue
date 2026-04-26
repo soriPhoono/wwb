@@ -2,7 +2,20 @@
 import { ref, onMounted } from "vue";
 import { useAuth } from "../composables/useAuth";
 
-const { user, fetchMe } = useAuth();
+const {
+  user,
+  fetchMe,
+  mfaPending,
+  mfaPhoneMasked,
+  mfaToken,
+  verifyMfa,
+  resendMfaCode,
+  cancelMfa,
+} = useAuth();
+
+const mfaCode = ref("");
+const mfaLoading = ref(false);
+const mfaError = ref("");
 
 // Profile form
 const profileEmail = ref("");
@@ -48,6 +61,16 @@ async function handleProfileUpdate() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Update failed.");
+
+    // Check if verification is required
+    if (data.mfaRequired) {
+      mfaPending.value = true;
+      mfaToken.value = data.mfaToken;
+      mfaPhoneMasked.value = data.phoneMasked || "";
+      profileSuccess.value = "Verification code sent to your new number.";
+      return;
+    }
+
     // Refresh user state
     await fetchMe();
     profileSuccess.value = "Profile updated successfully.";
@@ -55,6 +78,26 @@ async function handleProfileUpdate() {
     profileError.value = err.message;
   } finally {
     profileLoading.value = false;
+  }
+}
+
+async function handleVerifyMfa() {
+  if (mfaCode.value.length !== 6) {
+    mfaError.value = "Please enter a valid 6-digit code.";
+    return;
+  }
+
+  mfaLoading.value = true;
+  mfaError.value = "";
+  try {
+    await verifyMfa(mfaCode.value);
+    mfaCode.value = "";
+    profileSuccess.value = "Phone number updated successfully.";
+    // Refresh user state is already handled by verifyMfa setting user.value
+  } catch (err) {
+    mfaError.value = err.message;
+  } finally {
+    mfaLoading.value = false;
   }
 }
 
@@ -389,6 +432,89 @@ function formatDate(dateStr) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- MFA Modal -->
+    <div
+      v-if="mfaPending"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+    >
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200"
+      >
+        <div class="bg-slate-900 p-8 text-center">
+          <div
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500 mb-5 shadow-lg shadow-blue-500/30"
+          >
+            <svg
+              class="w-7 h-7 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-white m-0">Verify your phone</h2>
+          <p class="text-slate-400 text-sm mt-2 m-0">
+            We sent a code to {{ mfaPhoneMasked }}
+          </p>
+        </div>
+
+        <div class="p-8 space-y-6">
+          <div
+            v-if="mfaError"
+            class="bg-red-50 text-red-600 text-xs font-medium p-3 rounded-lg border border-red-100 flex items-center gap-2"
+          >
+            <span>⚠️</span>
+            <span>{{ mfaError }}</span>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+            >
+              Verification Code
+            </label>
+            <input
+              v-model="mfaCode"
+              type="text"
+              maxlength="6"
+              placeholder="000000"
+              class="w-full text-center text-3xl font-mono tracking-[0.5em] border-2 border-slate-100 rounded-2xl py-4 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-200"
+              @keyup.enter="handleVerifyMfa"
+            />
+          </div>
+
+          <button
+            @click="handleVerifyMfa"
+            :disabled="mfaLoading || mfaCode.length !== 6"
+            class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer border-none"
+          >
+            {{ mfaLoading ? "Verifying..." : "Verify & Update" }}
+          </button>
+
+          <div class="flex items-center justify-between pt-2">
+            <button
+              @click="resendMfaCode"
+              class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors bg-transparent border-none cursor-pointer"
+            >
+              Resend code
+            </button>
+            <button
+              @click="cancelMfa"
+              class="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors bg-transparent border-none cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

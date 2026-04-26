@@ -17,6 +17,10 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
+  pendingPhone: {
+    type: String,
+    default: null,
+  },
   mfaEnabled: {
     type: Boolean,
     default: false,

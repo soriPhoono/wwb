@@ -30,10 +30,14 @@ function signToken(userId) {
  * but still needs to complete MFA. Contains a `mfaPending` flag so it
  * cannot be confused with a real session token.
  */
-function signMfaToken(userId) {
-  return sign({ userId: userId.toString(), mfaPending: true }, getJwtSecret(), {
-    expiresIn: "10m",
-  });
+function signMfaToken(userId, context = "auth") {
+  return sign(
+    { userId: userId.toString(), mfaPending: true, context },
+    getJwtSecret(),
+    {
+      expiresIn: "10m",
+    },
+  );
 }
 
 // POST /api/auth/register
@@ -205,8 +209,16 @@ router.post("/mfa/verify", async (req, res) => {
   }
 
   // 3. Check the code with Twilio Verify
+  // Use pendingPhone if this is a profile update verification, otherwise use current phone
+  const phoneToVerify =
+    payload.context === "profile_update" ? user.pendingPhone : user.phone;
+
+  if (!phoneToVerify) {
+    return res.status(400).json({ error: "No phone number to verify." });
+  }
+
   try {
-    const approved = await checkVerificationCode(user.phone, code);
+    const approved = await checkVerificationCode(phoneToVerify, code);
     if (!approved) {
       return res.status(401).json({ error: "Incorrect verification code." });
     }
@@ -217,7 +229,16 @@ router.post("/mfa/verify", async (req, res) => {
       .json({ error: "Verification service error. Try again." });
   }
 
-  // 4. MFA passed — issue the real session
+  // 4. Verification passed
+  // If this was a profile update, "commit" the new phone number
+  if (payload.context === "profile_update" && user.pendingPhone) {
+    user.phone = user.pendingPhone;
+    user.pendingPhone = null;
+    user.mfaEnabled = true;
+    await user.save();
+  }
+
+  // Issue the real session (or refresh it)
   const token = signToken(user._id);
   res.cookie("token", token, COOKIE_OPTS);
   return res.json({ user: user.toSafeObject() });
@@ -245,12 +266,15 @@ router.post("/mfa/resend", async (req, res) => {
   }
 
   const user = await User.findById(payload.userId);
-  if (!user || !user.phone) {
-    return res.status(404).json({ error: "User not found." });
+  const phoneToResend =
+    payload.context === "profile_update" ? user?.pendingPhone : user?.phone;
+
+  if (!user || !phoneToResend) {
+    return res.status(404).json({ error: "User or phone number not found." });
   }
 
   try {
-    await sendVerificationCode(user.phone);
+    await sendVerificationCode(phoneToResend);
     return res.json({ message: "Verification code resent." });
   } catch (twilioErr) {
     console.error("Twilio resend error:", twilioErr);
@@ -302,10 +326,28 @@ router.patch("/profile", requireAuth, async (req, res) => {
     // Handle phone change
     const newPhone = normalizePhoneNumber(phone);
     if (newPhone !== user.phone) {
-      user.phone = newPhone;
-      // Reset MFA enabled status if phone changed?
-      // For simplicity, we keep it enabled if a phone is there.
-      user.mfaEnabled = !!newPhone;
+      // Store as pending and require verification
+      user.pendingPhone = newPhone;
+      user.email = normalizedEmail; // Save email change too if present
+      await user.save();
+
+      try {
+        await sendVerificationCode(newPhone);
+        const mfaToken = signMfaToken(user._id, "profile_update");
+        const masked =
+          newPhone.slice(0, -4).replace(/./g, "*") + newPhone.slice(-4);
+
+        return res.json({
+          mfaRequired: true,
+          mfaToken,
+          phoneMasked: masked,
+        });
+      } catch (twilioErr) {
+        console.error("Twilio send error during profile update:", twilioErr);
+        return res.status(502).json({
+          error: "Failed to send verification code. Please try again.",
+        });
+      }
     }
 
     user.email = normalizedEmail;
