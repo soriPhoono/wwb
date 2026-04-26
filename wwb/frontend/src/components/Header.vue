@@ -3,7 +3,7 @@ import { useCart } from "../composables/useCart";
 import { useAuth } from "../composables/useAuth";
 import UserMenu from "./UserMenu.vue";
 
-const { cartCount, toggleCart } = useCart();
+const { cartCount, toggleCart, canUseCart } = useCart();
 const { isLoggedIn, user } = useAuth();
 </script>
 
@@ -69,6 +69,7 @@ const { isLoggedIn, user } = useAuth();
 
         <!-- Cart -->
         <button
+          v-if="canUseCart"
           id="cart-button"
           class="cursor-pointer rounded-xl bg-blue-600 text-white px-4 py-2.5 font-bold hover:bg-blue-700 transition-colors shadow-sm text-sm"
           @click="toggleCart"

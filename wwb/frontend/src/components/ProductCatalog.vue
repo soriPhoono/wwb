@@ -1,7 +1,7 @@
 <script setup>
 import { useCart, products } from "../composables/useCart";
 
-const { addToCart } = useCart();
+const { addToCart, canUseCart } = useCart();
 </script>
 
 <template>
@@ -54,6 +54,7 @@ const { addToCart } = useCart();
             </p>
           </div>
           <button
+            v-if="canUseCart"
             class="w-full bg-slate-900 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-blue-600 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
             @click="addToCart(product.id)"
           >

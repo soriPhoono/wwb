@@ -81,6 +81,12 @@ watch(
 
     // If logged in and NOT currently hydrating from backend, sync to backend
     if (user.value && !isHydrating) {
+      // Don't sync if user is staff
+      const isStaff = user.value.roles?.some((role) =>
+        ["admin", "content-creator"].includes(role),
+      );
+      if (isStaff) return;
+
       const { syncCart } = useCart();
       syncCart();
     }
@@ -93,9 +99,20 @@ watch(
   user,
   async (newUser, oldUser) => {
     if (newUser && !oldUser) {
-      // Login or session rehydration: fetch account cart
-      const { fetchCart } = useCart();
-      await fetchCart();
+      // Check if the new user is staff
+      const isStaff = newUser.roles?.some((role) =>
+        ["admin", "content-creator"].includes(role),
+      );
+
+      if (isStaff) {
+        // Staff members shouldn't have a cart; clear any local guest cart
+        const { clearCart } = useCart();
+        clearCart();
+      } else {
+        // Regular customer login: fetch account cart
+        const { fetchCart } = useCart();
+        await fetchCart();
+      }
     } else if (!newUser && oldUser) {
       // Logout: flush cart
       const { clearCart } = useCart();
@@ -219,9 +236,19 @@ export function useCart() {
     return cart.value.reduce((count, item) => count + item.quantity, 0);
   });
 
+  const canUseCart = computed(() => {
+    if (!user.value) return true; // Guests can use local cart
+    if (!user.value.roles) return true;
+    const isStaff = user.value.roles.some((role) =>
+      ["admin", "content-creator"].includes(role),
+    );
+    return !isStaff;
+  });
+
   return {
     cart,
     isCartOpen,
+    canUseCart,
     addToCart,
     removeFromCart,
     updateQuantity,

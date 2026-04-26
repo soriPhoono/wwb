@@ -121,9 +121,18 @@ export function useAuth() {
     }
   }
 
+  const isStaff = computed(() => {
+    if (!user.value || !user.value.roles) return false;
+    // Common staff roles: admin, content-creator
+    return user.value.roles.some((role) =>
+      ["admin", "content-creator"].includes(role),
+    );
+  });
+
   return {
     user,
     isLoggedIn,
+    isStaff,
     authLoading,
     mfaPending,
     mfaToken,

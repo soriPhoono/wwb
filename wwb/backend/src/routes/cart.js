@@ -1,6 +1,7 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
+import { getRoleIds } from "../config/roles.js";
 
 const router = Router();
 
@@ -10,6 +11,15 @@ router.get("/", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found." });
+
+    // Check if user has administrative roles
+    const staffRoles = getRoleIds();
+    const isStaff = user.roles.some((role) => staffRoles.includes(role));
+    if (isStaff) {
+      return res
+        .status(403)
+        .json({ error: "Staff members cannot use the cart system." });
+    }
 
     res.json({ cart: user.cart || [] });
   } catch (err) {
@@ -38,6 +48,15 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found." });
+
+    // Check if user has administrative roles
+    const staffRoles = getRoleIds();
+    const isStaff = user.roles.some((role) => staffRoles.includes(role));
+    if (isStaff) {
+      return res
+        .status(403)
+        .json({ error: "Staff members cannot use the cart system." });
+    }
 
     user.cart = validCart;
     await user.save();

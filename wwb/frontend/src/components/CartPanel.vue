@@ -8,11 +8,13 @@ const {
   updateQuantity,
   removeFromCart,
   cartTotal,
+  canUseCart,
 } = useCart();
 </script>
 
 <template>
   <aside
+    v-if="canUseCart"
     id="cart-panel"
     class="fixed top-0 right-0 w-[360px] max-w-[95vw] h-full bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.14)] z-[1200] flex flex-col transition-transform duration-300 ease-in-out"
     :class="isCartOpen ? 'translate-x-0' : 'translate-x-full'"
