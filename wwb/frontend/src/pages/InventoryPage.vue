@@ -163,26 +163,28 @@ onMounted(fetchProducts);
     >
       <div class="text-center md:text-left">
         <div
-          class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-widest uppercase"
+          class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-widest uppercase"
         >
           Product Management
         </div>
         <h1
-          class="text-5xl sm:text-7xl font-black mb-4 tracking-tight bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+          class="text-5xl sm:text-7xl font-black mb-4 tracking-tight text-slate-900 dark:text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
         >
           Inventory
         </h1>
-        <p class="text-slate-400 text-lg max-w-2xl leading-relaxed">
+        <p
+          class="text-slate-600 dark:text-slate-400 text-lg max-w-2xl leading-relaxed"
+        >
           Manage your digital catalog, track stock levels, and update product
           specifications in real-time.
         </p>
 
         <div
-          class="mt-10 flex justify-center md:justify-start gap-3 p-1.5 bg-slate-900/40 rounded-full border border-white/5 w-fit backdrop-blur-md"
+          class="mt-10 flex justify-center md:justify-start gap-3 p-1.5 bg-slate-100/80 dark:bg-slate-900/40 rounded-full border border-slate-200 dark:border-white/5 w-fit backdrop-blur-md shadow-sm"
         >
           <router-link
             to="/admin"
-            class="px-8 py-2.5 rounded-full font-bold transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white"
+            class="px-8 py-2.5 rounded-full font-bold transition-all duration-300 flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white"
             active-class="bg-blue-600 text-white shadow-lg shadow-blue-600/20"
           >
             <svg
@@ -258,7 +260,7 @@ onMounted(fetchProducts);
 
     <!-- Toolbar -->
     <div
-      class="flex flex-col sm:flex-row gap-5 mb-12 items-center p-2 bg-slate-900/30 rounded-3xl border border-white/5 backdrop-blur-xl shadow-2xl"
+      class="flex flex-col sm:flex-row gap-5 mb-12 items-center p-2 bg-white/50 dark:bg-slate-900/30 rounded-3xl border border-slate-200 dark:border-white/5 backdrop-blur-xl shadow-xl dark:shadow-2xl"
     >
       <div class="relative flex-1 w-full group">
         <div
@@ -283,14 +285,16 @@ onMounted(fetchProducts);
           v-model="searchQuery"
           type="text"
           placeholder="Search products by name or category..."
-          class="w-full bg-slate-900/60 border border-white/5 pl-14 pr-6 py-4 rounded-2xl text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-slate-600"
+          class="w-full bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 pl-14 pr-6 py-4 rounded-2xl text-slate-900 dark:text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-600"
         />
       </div>
       <div
-        class="px-6 py-2 bg-white/5 rounded-xl border border-white/5 text-slate-400 font-bold whitespace-nowrap"
+        class="px-6 py-2 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 font-bold whitespace-nowrap"
       >
         {{ filteredProducts.length }}
-        <span class="text-slate-600 font-medium">Results</span>
+        <span class="text-slate-400 dark:text-slate-600 font-medium"
+          >Results</span
+        >
       </div>
     </div>
 
@@ -321,7 +325,7 @@ onMounted(fetchProducts);
       <div
         v-for="product in filteredProducts"
         :key="product._id"
-        class="group flex flex-col rounded-[32px] overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-blue-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+        class="group relative flex flex-col bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[32px] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-blue-500/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05),0_0_20px_rgba(59,130,246,0.05)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_20px_rgba(59,130,246,0.1)]"
       >
         <div class="aspect-[16/10] overflow-hidden relative bg-slate-950">
           <img
@@ -377,7 +381,7 @@ onMounted(fetchProducts);
         <div class="p-8 flex-1 flex flex-col relative">
           <div class="mb-4">
             <h3
-              class="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors truncate"
+              class="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate"
             >
               {{ product.name }}
             </h3>
@@ -388,7 +392,7 @@ onMounted(fetchProducts);
 
           <div class="grid grid-cols-2 gap-4 mb-8">
             <div
-              class="bg-slate-950/40 p-4 rounded-2xl border border-white/5 transition-colors group-hover:border-blue-500/10"
+              class="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200 dark:border-white/5 transition-colors group-hover:border-blue-500/10"
             >
               <span
                 class="text-[10px] uppercase tracking-widest text-slate-600 font-black block mb-1"
@@ -403,13 +407,13 @@ onMounted(fetchProducts);
                       : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
                   "
                 ></div>
-                <span class="text-slate-200 font-bold"
+                <span class="text-slate-700 dark:text-slate-200 font-bold"
                   >{{ product.stock }} Units</span
                 >
               </div>
             </div>
             <div
-              class="bg-slate-950/40 p-4 rounded-2xl border border-white/5 transition-colors group-hover:border-blue-500/10"
+              class="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200 dark:border-white/5 transition-colors group-hover:border-blue-500/10"
             >
               <span
                 class="text-[10px] uppercase tracking-widest text-slate-600 font-black block mb-1"
@@ -427,7 +431,7 @@ onMounted(fetchProducts);
           <div class="flex gap-3 mt-auto">
             <button
               @click="openEditModal(product)"
-              class="flex-1 bg-white/5 hover:bg-white/10 text-white py-4 rounded-2xl font-bold transition-all border border-white/10 flex items-center justify-center gap-2 group/btn"
+              class="flex-1 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-900 dark:text-white py-4 rounded-2xl font-bold transition-all border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 group/btn"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

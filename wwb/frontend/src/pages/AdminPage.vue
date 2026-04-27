@@ -123,7 +123,7 @@ onMounted(fetchData);
         Management Center
       </div>
       <h1
-        class="text-5xl sm:text-7xl font-black mb-4 tracking-tight bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-500 bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+        class="text-5xl sm:text-7xl font-black mb-4 tracking-tight text-slate-900 dark:text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
       >
         Admin Dashboard
       </h1>
