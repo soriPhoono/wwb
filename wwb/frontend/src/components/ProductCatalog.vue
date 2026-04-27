@@ -1,7 +1,7 @@
 <script setup>
 import { useCart, products } from "../composables/useCart";
 
-const { addToCart, canUseCart } = useCart();
+const { addToCart, canUseCart, getAvailableStock } = useCart();
 </script>
 
 <template>
@@ -76,9 +76,34 @@ const { addToCart, canUseCart } = useCart();
             <p class="text-slate-600 text-sm mb-6 flex-1 leading-relaxed">
               {{ product.description }}
             </p>
-            <div class="flex items-center justify-between mt-auto mb-5">
-              <p class="text-3xl font-extrabold text-slate-900 m-0">
-                ${{ product.price.toFixed(2) }}
+            <div class="mt-auto mb-5">
+              <div class="flex items-center justify-between mb-1">
+                <p class="text-3xl font-extrabold text-slate-900 m-0">
+                  ${{ product.price.toFixed(2) }}
+                </p>
+                <span
+                  class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border"
+                  :class="
+                    getAvailableStock(
+                      product.productId || product._id || product.id,
+                    ) > 0
+                      ? 'text-green-600 border-green-100 bg-green-50/50'
+                      : 'text-red-600 border-red-100 bg-red-50/50'
+                  "
+                >
+                  {{
+                    getAvailableStock(
+                      product.productId || product._id || product.id,
+                    )
+                  }}
+                  In Stock
+                </span>
+              </div>
+              <p
+                v-if="product.claimedCount > 0"
+                class="text-[10px] text-slate-400 font-medium italic"
+              >
+                {{ product.claimedCount }} total units currently in carts
               </p>
             </div>
             <button

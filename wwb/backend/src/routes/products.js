@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireContentCreator } from "../middleware/admin.js";
 import upload from "../middleware/upload.js";
@@ -17,7 +18,32 @@ router.get("/", async (req, res) => {
     const products = await Product.find({ isActive: true }).sort({
       createdAt: -1,
     });
-    res.json(products);
+
+    // Aggregate claimed counts from all users' carts
+    const claimedCounts = await User.aggregate([
+      { $unwind: "$cart" },
+      {
+        $group: {
+          _id: "$cart.productId",
+          totalClaimed: { $sum: "$cart.quantity" },
+        },
+      },
+    ]);
+
+    // Map counts for easy lookup
+    const countsMap = {};
+    claimedCounts.forEach((c) => {
+      countsMap[c._id] = c.totalClaimed;
+    });
+
+    // Attach claimedCount to each product
+    const enrichedProducts = products.map((p) => {
+      const productObj = p.toObject();
+      productObj.claimedCount = countsMap[p.productId || p._id] || 0;
+      return productObj;
+    });
+
+    res.json(enrichedProducts);
   } catch (err) {
     console.error("Error fetching products:", err);
     res.status(500).json({ error: "Failed to fetch products." });

@@ -158,12 +158,22 @@ export function useCart() {
 
   const syncCart = async () => {
     try {
-      await fetch("/api/cart", {
+      const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ cart: simplifyCart(cart.value) }),
       });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Failed to sync cart.");
+        // Optional: revert local cart if sync fails
+        await fetchCart();
+      } else {
+        // Refresh product counts after successful sync
+        await fetchProducts();
+      }
     } catch (err) {
       console.error("Failed to sync cart:", err);
     }
@@ -178,25 +188,48 @@ export function useCart() {
     }, 0);
   };
 
+  const getAvailableStock = (productId) => {
+    const product = products.value.find(
+      (p) => (p.productId || p._id || p.id) === productId,
+    );
+    if (!product) return 0;
+
+    const myItem = cart.value.find(
+      (item) => (item.productId || item._id || item.id) === productId,
+    );
+    const myQty = myItem ? myItem.quantity : 0;
+
+    const othersClaimed = Math.max(0, (product.claimedCount || 0) - myQty);
+    return Math.max(0, (product.stock || 0) - othersClaimed);
+  };
+
   const addToCart = async (productId) => {
     const product = products.value.find(
       (item) => (item.productId || item._id || item.id) === productId,
     );
     if (!product) return;
 
+    const available = getAvailableStock(productId);
     const existingItem = cart.value.find(
       (item) => (item.productId || item._id || item.id) === productId,
     );
 
     if (existingItem) {
+      if (existingItem.quantity >= available) {
+        alert(`Cannot add more. Only ${available} units available in total.`);
+        return;
+      }
       existingItem.quantity += 1;
     } else {
+      if (available <= 0) {
+        alert("This item is currently fully claimed by other users.");
+        return;
+      }
       cart.value.push({
         ...product,
         quantity: 1,
       });
     }
-    // No explicit sync here; watcher handles it if we add logic there or call sync manually
   };
 
   const removeFromCart = (productId) => {
@@ -211,6 +244,14 @@ export function useCart() {
         (product.productId || product._id || product.id) === productId,
     );
     if (!item) return;
+
+    if (change > 0) {
+      const available = getAvailableStock(productId);
+      if (item.quantity >= available) {
+        alert(`Cannot add more. Only ${available} units available in total.`);
+        return;
+      }
+    }
 
     item.quantity += change;
 
@@ -256,5 +297,6 @@ export function useCart() {
     fetchCart,
     syncCart,
     clearCart,
+    getAvailableStock,
   };
 }

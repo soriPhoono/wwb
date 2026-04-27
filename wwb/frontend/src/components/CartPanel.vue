@@ -9,6 +9,7 @@ const {
   removeFromCart,
   cartTotal,
   canUseCart,
+  getAvailableStock,
 } = useCart();
 </script>
 
@@ -55,6 +56,15 @@ const {
             <span class="font-semibold w-6 text-center">{{
               item.quantity
             }}</span>
+            <div
+              v-if="
+                item.quantity >=
+                getAvailableStock(item.productId || item._id || item.id)
+              "
+              class="w-full text-[9px] text-red-500 font-bold uppercase mt-1"
+            >
+              Max Stock Reached
+            </div>
             <button
               class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded cursor-pointer border-none transition-colors"
               @click="updateQuantity(item.productId || item._id || item.id, 1)"

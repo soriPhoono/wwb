@@ -1,5 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
+import Product from "../models/Product.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getRoleIds } from "../config/roles.js";
 
@@ -56,6 +57,48 @@ router.post("/", requireAuth, async (req, res) => {
       return res
         .status(403)
         .json({ error: "Staff members cannot use the cart system." });
+    }
+
+    // ── Stock Validation ──────────────────────────────────────────
+    // Get total claimed by OTHER users
+    const othersClaimed = await User.aggregate([
+      { $match: { _id: { $ne: user._id } } },
+      { $unwind: "$cart" },
+      {
+        $group: {
+          _id: "$cart.productId",
+          total: { $sum: "$cart.quantity" },
+        },
+      },
+    ]);
+
+    const othersMap = {};
+    othersClaimed.forEach((c) => {
+      othersMap[c._id] = c.total;
+    });
+
+    // Get all products to check stock
+    const products = await Product.find({
+      productId: { $in: validCart.map((i) => i.productId) },
+    });
+    const productMap = {};
+    products.forEach((p) => {
+      productMap[p.productId] = p;
+    });
+
+    // Check each item
+    for (const item of validCart) {
+      const product = productMap[item.productId];
+      if (!product) continue;
+
+      const claimedByOthers = othersMap[item.productId] || 0;
+      const available = Math.max(0, product.stock - claimedByOthers);
+
+      if (item.quantity > available) {
+        return res.status(400).json({
+          error: `Insufficient stock for ${product.name}. Only ${available} units available (considering other users' carts).`,
+        });
+      }
     }
 
     user.cart = validCart;
