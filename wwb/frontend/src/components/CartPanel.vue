@@ -38,7 +38,7 @@ const {
         v-else
         class="border border-gray-200 rounded-xl p-4 mb-3 shadow-sm"
         v-for="item in cart"
-        :key="item.id"
+        :key="item.productId || item._id"
       >
         <div>
           <h4 class="m-0 mb-1.5 font-bold text-slate-800">{{ item.name }}</h4>
@@ -48,7 +48,7 @@ const {
           <div class="flex items-center gap-2 mt-3 flex-wrap">
             <button
               class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded cursor-pointer border-none transition-colors"
-              @click="updateQuantity(item.id, -1)"
+              @click="updateQuantity(item.productId || item._id, -1)"
             >
               -
             </button>
@@ -57,13 +57,13 @@ const {
             }}</span>
             <button
               class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded cursor-pointer border-none transition-colors"
-              @click="updateQuantity(item.id, 1)"
+              @click="updateQuantity(item.productId || item._id, 1)"
             >
               +
             </button>
             <button
               class="bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1.5 rounded cursor-pointer border-none transition-colors ml-auto text-sm font-semibold"
-              @click="removeFromCart(item.id)"
+              @click="removeFromCart(item.productId || item._id)"
             >
               Remove
             </button>

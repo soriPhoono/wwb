@@ -160,7 +160,7 @@ function formatDate(dateStr) {
       <!-- Page heading -->
       <div class="mb-10">
         <h1
-          class="text-4xl font-black text-slate-900 m-0 tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-transparent"
+          class="text-4xl font-black text-slate-900 m-0 tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text"
         >
           Account Settings
         </h1>
