@@ -89,6 +89,8 @@ services:
       TWILIO_VERIFY_SERVICE_SID_FILE: /run/secrets/twilio-verify-service-sid
     networks:
       - wwb-internal
+    volumes:
+      - backend-uploads:/app/uploads
     deploy:
       mode: replicated
       replicas: 1
@@ -179,4 +181,6 @@ configs:
 # ──────────────────────────────────────────────
 volumes:
   mongo-data:
+    driver: local
+  backend-uploads:
     driver: local
