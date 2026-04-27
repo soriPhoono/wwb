@@ -13,6 +13,7 @@ with pkgs;
       agenix-cli
       ssh-to-age
       sops
+      stripe-cli
 
       nodejs
 

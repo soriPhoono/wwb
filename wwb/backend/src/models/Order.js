@@ -39,6 +39,16 @@ const orderSchema = new Schema(
       enum: ["pending", "completed", "cancelled"],
       default: "pending",
     },
+    paymentMethod: {
+      type: String,
+      enum: ["stripe", "manual"],
+      default: "stripe",
+    },
+    accessKey: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     shippingDetails: {
       address: String,
       city: String,
