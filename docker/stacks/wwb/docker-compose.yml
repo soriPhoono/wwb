@@ -101,7 +101,7 @@ services:
   # Caddy proxies /api/* → backend:3000
   # ──────────────────────────────────────────────
   frontend:
-    image: ghcr.io/soriphoono/wwb-frontend:0.1.0
+    image: ghcr.io/soriphoono/wwb-frontend:0.1.1
     depends_on:
       - backend
     networks:
