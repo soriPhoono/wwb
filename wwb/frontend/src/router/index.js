@@ -6,6 +6,7 @@ import LoginPage from "../pages/LoginPage.vue";
 import RegisterPage from "../pages/RegisterPage.vue";
 import AccountPage from "../pages/AccountPage.vue";
 import AdminPage from "../pages/AdminPage.vue";
+import InventoryPage from "../pages/InventoryPage.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomePage },
@@ -32,6 +33,12 @@ const routes = [
     name: "admin",
     component: AdminPage,
     meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: "/admin/inventory",
+    name: "inventory",
+    component: InventoryPage,
+    meta: { requiresAuth: true, requiresStaff: true },
   },
 ];
 
@@ -78,6 +85,17 @@ router.beforeEach(async (to, from) => {
   if (to.meta.requiresAdmin) {
     const { user } = useAuth();
     if (!user.value?.roles?.includes("admin")) {
+      return { name: "home" };
+    }
+  }
+
+  // Redirect non-staff away from staff-only pages
+  if (to.meta.requiresStaff) {
+    const { user } = useAuth();
+    const isStaff =
+      user.value?.roles?.includes("admin") ||
+      user.value?.roles?.includes("content-creator");
+    if (!isStaff) {
       return { name: "home" };
     }
   }

@@ -124,6 +124,22 @@ onMounted(fetchData);
       <p class="text-slate-400 text-lg max-w-xl mx-auto">
         Manage user roles and platform permissions
       </p>
+      <div class="mt-8 flex justify-center gap-4">
+        <router-link
+          to="/admin"
+          class="px-6 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold"
+          active-class="bg-blue-500 text-white"
+        >
+          Users
+        </router-link>
+        <router-link
+          to="/admin/inventory"
+          class="px-6 py-2 rounded-full border border-white/10 bg-white/5 text-slate-400 hover:text-white transition-all font-bold"
+          active-class="bg-blue-500 text-white border-blue-500"
+        >
+          Inventory
+        </router-link>
+      </div>
     </div>
 
     <div

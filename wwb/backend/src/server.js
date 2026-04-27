@@ -5,6 +5,7 @@ import { connectDB } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import cartRoutes from "./routes/cart.js";
 import adminRoutes from "./routes/admin.js";
+import productRoutes from "./routes/products.js";
 import { initializeAdmin } from "./services/init.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.use(
 );
 app.use(json());
 app.use(cookieParser());
+app.use("/uploads", express.static("uploads"));
 
 // API Routes
 app.get("/api/health", (req, res) => {
@@ -33,6 +35,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/products", productRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
