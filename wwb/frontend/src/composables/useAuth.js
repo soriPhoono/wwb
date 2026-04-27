@@ -129,6 +129,40 @@ export function useAuth() {
     );
   });
 
+  async function updateProfile({ email, phone }) {
+    const res = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, phone }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Profile update failed.");
+
+    // Check if MFA challenge was returned
+    if (data.mfaRequired) {
+      mfaPending.value = true;
+      mfaToken.value = data.mfaToken;
+      mfaPhoneMasked.value = data.phoneMasked || "";
+      return null;
+    }
+
+    user.value = data.user;
+    return data.user;
+  }
+
+  async function updatePassword(currentPassword, newPassword) {
+    const res = await fetch("/api/auth/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Password update failed.");
+    return data.message;
+  }
+
   return {
     user,
     isLoggedIn,
@@ -144,5 +178,7 @@ export function useAuth() {
     cancelMfa,
     logout,
     fetchMe,
+    updateProfile,
+    updatePassword,
   };
 }
