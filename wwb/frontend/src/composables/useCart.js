@@ -100,7 +100,7 @@ function hydrateCart(simpleCart) {
   return simpleCart
     .map((item) => {
       const product = products.value.find(
-        (p) => (p.productId || p.id) === item.productId,
+        (p) => (p.productId || p._id || p.id) === item.productId,
       );
       if (!product) return null;
       return {
@@ -180,11 +180,13 @@ export function useCart() {
 
   const addToCart = async (productId) => {
     const product = products.value.find(
-      (item) => (item.productId || item.id) === productId,
+      (item) => (item.productId || item._id || item.id) === productId,
     );
     if (!product) return;
 
-    const existingItem = cart.value.find((item) => item.id === productId);
+    const existingItem = cart.value.find(
+      (item) => (item.productId || item._id || item.id) === productId,
+    );
 
     if (existingItem) {
       existingItem.quantity += 1;
@@ -198,11 +200,16 @@ export function useCart() {
   };
 
   const removeFromCart = (productId) => {
-    cart.value = cart.value.filter((item) => item.id !== productId);
+    cart.value = cart.value.filter(
+      (item) => (item.productId || item._id || item.id) !== productId,
+    );
   };
 
   const updateQuantity = (productId, change) => {
-    const item = cart.value.find((product) => product.id === productId);
+    const item = cart.value.find(
+      (product) =>
+        (product.productId || product._id || product.id) === productId,
+    );
     if (!item) return;
 
     item.quantity += change;

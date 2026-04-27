@@ -32,7 +32,7 @@ const { addToCart, canUseCart } = useCart();
       >
         <article
           v-for="product in products"
-          :key="product.productId || product._id"
+          :key="product.productId || product._id || product.id"
           class="bg-white rounded-3xl shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1.5 transition-all duration-300 border border-slate-100 flex flex-col group overflow-hidden"
         >
           <div class="aspect-video overflow-hidden bg-slate-100 relative">
@@ -84,7 +84,7 @@ const { addToCart, canUseCart } = useCart();
             <button
               v-if="canUseCart"
               class="w-full bg-slate-900 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-blue-600 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
-              @click="addToCart(product.productId || product._id)"
+              @click="addToCart(product.productId || product._id || product.id)"
             >
               Add to Cart
             </button>
