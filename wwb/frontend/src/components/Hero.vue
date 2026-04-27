@@ -28,11 +28,12 @@
         </p>
 
         <div class="flex gap-4 flex-wrap mb-12">
-          <a
+          <RouterLink
+            to="/shop"
             class="inline-block text-center no-underline px-8 py-3.5 font-bold rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-200"
-            href="#catalog"
-            >Browse Products</a
           >
+            Browse Products
+          </RouterLink>
           <a
             class="inline-block text-center no-underline px-8 py-3.5 font-bold rounded-xl bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             href="#security"

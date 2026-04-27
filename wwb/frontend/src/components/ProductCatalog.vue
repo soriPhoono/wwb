@@ -1,7 +1,9 @@
 <script setup>
+import { computed } from "vue";
 import { useCart, products } from "../composables/useCart";
-
 const { addToCart, canUseCart, getAvailableStock } = useCart();
+
+const featuredProducts = computed(() => products.value.slice(0, 4));
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const { addToCart, canUseCart, getAvailableStock } = useCart();
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
       >
         <article
-          v-for="product in products"
+          v-for="product in featuredProducts"
           :key="product.productId || product._id || product.id"
           class="bg-white rounded-3xl shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1.5 transition-all duration-300 border border-slate-100 flex flex-col group overflow-hidden"
         >
@@ -115,6 +117,15 @@ const { addToCart, canUseCart, getAvailableStock } = useCart();
             </button>
           </div>
         </article>
+      </div>
+
+      <div class="mt-16 text-center">
+        <RouterLink
+          to="/shop"
+          class="inline-block bg-white text-blue-600 font-bold py-4 px-10 rounded-2xl border-2 border-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-lg shadow-blue-600/10 no-underline text-lg"
+        >
+          View Full Collection
+        </RouterLink>
       </div>
     </div>
   </section>
