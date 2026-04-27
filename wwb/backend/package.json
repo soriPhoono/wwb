@@ -1,6 +1,6 @@
 {
   "name": "group-14-website",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CSCE 4560/5560 Spring 2026 Group 14",
   "main": "src/server.js",
   "scripts": {
