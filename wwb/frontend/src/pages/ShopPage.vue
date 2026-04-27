@@ -37,16 +37,16 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 pt-10 pb-20">
+  <div class="min-h-screen pt-10 pb-20">
     <div class="max-w-[1120px] w-[92%] mx-auto">
       <!-- Header -->
       <header class="mb-12 text-center md:text-left">
         <h1
-          class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight"
+          class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight"
         >
           Browse Our Collection
         </h1>
-        <p class="text-slate-600 text-lg max-w-2xl leading-relaxed">
+        <p class="text-slate-400 text-lg max-w-2xl leading-relaxed">
           Explore our wide range of high-quality items, automatically organized
           for your convenience.
         </p>
@@ -54,13 +54,13 @@ const closeModal = () => {
 
       <!-- Category Navigation -->
       <nav
-        class="sticky top-20 z-30 mb-12 bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-sm border border-slate-200 flex gap-2 overflow-x-auto no-scrollbar"
+        class="sticky top-20 z-30 mb-12 bg-slate-900/40 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/5 flex gap-2 overflow-x-auto no-scrollbar"
       >
         <a
           v-for="cat in categories"
           :key="cat"
           :href="'#' + cat.toLowerCase().replace(/\s+/g, '-')"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 text-slate-600 no-underline"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200 hover:bg-white/5 hover:text-blue-400 text-slate-400 no-underline"
         >
           {{ cat }}
         </a>
@@ -77,10 +77,10 @@ const closeModal = () => {
       <!-- Empty State -->
       <div
         v-else-if="categories.length === 0"
-        class="py-20 text-center bg-white rounded-[40px] border border-slate-100 shadow-sm"
+        class="py-20 text-center bg-slate-900/40 rounded-[40px] border border-white/5 shadow-2xl"
       >
         <div
-          class="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6"
+          class="w-20 h-20 bg-slate-800/50 rounded-3xl flex items-center justify-center mx-auto mb-6"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -97,9 +97,7 @@ const closeModal = () => {
             />
           </svg>
         </div>
-        <h3 class="text-2xl font-bold text-slate-900 mb-2">
-          No products found
-        </h3>
+        <h3 class="text-2xl font-bold text-white mb-2">No products found</h3>
         <p class="text-slate-500 max-w-md mx-auto">
           We couldn't find any active products in our inventory. Please check
           back later or contact an administrator.
@@ -115,8 +113,8 @@ const closeModal = () => {
         class="mb-20 scroll-mt-40"
       >
         <div class="flex items-center gap-4 mb-8">
-          <h2 class="text-2xl font-bold text-slate-900 m-0">{{ cat }}</h2>
-          <div class="h-px bg-slate-200 flex-1"></div>
+          <h2 class="text-2xl font-bold text-white m-0">{{ cat }}</h2>
+          <div class="h-px bg-white/5 flex-1"></div>
           <span
             class="text-xs font-bold text-slate-400 uppercase tracking-widest"
             >{{ groupedProducts[cat].length }} Items</span
@@ -127,11 +125,11 @@ const closeModal = () => {
           <article
             v-for="product in groupedProducts[cat]"
             :key="product.productId || product._id || product.id"
-            class="bg-white rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-200 flex flex-col group overflow-hidden cursor-pointer"
+            class="bg-slate-900/40 rounded-3xl shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 border border-white/5 flex flex-col group overflow-hidden cursor-pointer"
             @click="openModal(product)"
           >
             <!-- Image Container -->
-            <div class="aspect-square overflow-hidden bg-slate-100 relative">
+            <div class="aspect-square overflow-hidden bg-slate-800/50 relative">
               <img
                 v-if="product.image"
                 :src="product.image"
@@ -164,7 +162,7 @@ const closeModal = () => {
               >
                 <button
                   v-if="canUseCart"
-                  class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl shadow-lg hover:bg-blue-600 hover:text-white transition-colors flex items-center justify-center gap-2"
+                  class="w-full bg-white text-slate-950 font-bold py-3 rounded-xl shadow-lg hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center gap-2"
                   @click.stop="
                     addToCart(product.productId || product._id || product.id)
                   "
@@ -187,14 +185,14 @@ const closeModal = () => {
             <!-- Content -->
             <div class="p-6 flex flex-col flex-1">
               <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold text-slate-900 m-0 leading-tight">
+                <h3 class="text-lg font-bold text-white m-0 leading-tight">
                   {{ product.name }}
                 </h3>
-                <p class="text-xl font-black text-blue-600 m-0">
+                <p class="text-xl font-black text-blue-400 m-0">
                   ${{ product.price.toFixed(2) }}
                 </p>
               </div>
-              <p class="text-slate-500 text-sm line-clamp-2 mb-4">
+              <p class="text-slate-400 text-sm line-clamp-2 mb-4">
                 {{ product.description }}
               </p>
 
@@ -206,8 +204,8 @@ const closeModal = () => {
                     getAvailableStock(
                       product.productId || product._id || product.id,
                     ) > 0
-                      ? 'text-green-600 border-green-100 bg-green-50'
-                      : 'text-red-600 border-red-100 bg-red-50'
+                      ? 'text-green-400 border-green-500/20 bg-green-500/10'
+                      : 'text-red-400 border-red-500/20 bg-red-500/10'
                   "
                 >
                   {{
@@ -238,15 +236,15 @@ const closeModal = () => {
 
         <!-- Modal Content -->
         <div
-          class="relative bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+          class="relative bg-slate-900 w-full max-w-4xl rounded-[40px] shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
         >
           <button
             @click="closeModal"
-            class="absolute top-6 right-6 z-10 bg-white/80 backdrop-blur shadow-md hover:bg-white p-2 rounded-full transition-colors cursor-pointer border-none"
+            class="absolute top-6 right-6 z-10 bg-slate-800/80 hover:bg-slate-700 backdrop-blur shadow-md p-2 rounded-full transition-colors cursor-pointer border-none"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 text-slate-900"
+              class="h-6 w-6 text-white"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -260,7 +258,7 @@ const closeModal = () => {
             </svg>
           </button>
 
-          <div class="w-full md:w-1/2 bg-slate-100 h-64 md:h-auto">
+          <div class="w-full md:w-1/2 bg-slate-950 h-64 md:h-auto">
             <img
               v-if="selectedProduct.image"
               :src="selectedProduct.image"
@@ -290,15 +288,15 @@ const closeModal = () => {
 
           <div class="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto">
             <span
-              class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full mb-4 uppercase tracking-widest"
+              class="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-full mb-4 uppercase tracking-widest border border-blue-500/20"
               >{{ selectedProduct.category }}</span
             >
             <h2
-              class="text-3xl md:text-4xl font-black text-slate-900 mb-2 leading-tight"
+              class="text-3xl md:text-4xl font-black text-white mb-2 leading-tight"
             >
               {{ selectedProduct.name }}
             </h2>
-            <p class="text-3xl font-extrabold text-blue-600 mb-8">
+            <p class="text-3xl font-extrabold text-blue-400 mb-8">
               ${{ selectedProduct.price.toFixed(2) }}
             </p>
 
@@ -308,18 +306,18 @@ const closeModal = () => {
               >
                 Product Description
               </h4>
-              <p class="text-slate-600 text-lg leading-relaxed">
+              <p class="text-slate-400 text-lg leading-relaxed">
                 {{ selectedProduct.description }}
               </p>
 
               <div
                 v-if="selectedProduct.details"
-                class="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-100"
+                class="mt-6 p-6 bg-slate-950/40 rounded-2xl border border-white/5"
               >
-                <h4 class="text-xs font-bold uppercase text-slate-900 mb-2">
+                <h4 class="text-xs font-bold uppercase text-white mb-2">
                   Specifications
                 </h4>
-                <p class="text-sm text-slate-600 m-0">
+                <p class="text-sm text-slate-400 m-0">
                   {{ selectedProduct.details }}
                 </p>
               </div>
@@ -327,13 +325,13 @@ const closeModal = () => {
 
             <div class="mt-auto space-y-4">
               <div
-                class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200"
+                class="flex items-center justify-between p-4 bg-slate-950/40 rounded-2xl border border-white/5"
               >
                 <span
                   class="text-sm font-bold text-slate-500 uppercase tracking-widest"
                   >Availability</span
                 >
-                <span class="font-black text-slate-900"
+                <span class="font-black text-white"
                   >{{
                     getAvailableStock(
                       selectedProduct.productId ||
@@ -347,7 +345,7 @@ const closeModal = () => {
 
               <button
                 v-if="canUseCart"
-                class="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl shadow-xl hover:bg-blue-600 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-[0_0_30px_rgba(37,99,235,0.2)] hover:bg-blue-500 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
                 @click="
                   addToCart(
                     selectedProduct.productId ||

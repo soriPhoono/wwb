@@ -118,24 +118,22 @@ onMounted(fetchData);
     <!-- Header / Hero Section -->
     <div class="mb-16 text-center animate-[fadeInDown_0.8s_ease-out]">
       <div
-        class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-widest uppercase"
+        class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-widest uppercase"
       >
         Management Center
       </div>
       <h1
-        class="text-5xl sm:text-7xl font-black mb-4 tracking-tight text-slate-900"
+        class="text-5xl sm:text-7xl font-black mb-4 tracking-tight text-white"
       >
         Admin Dashboard
       </h1>
-      <p
-        class="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed"
-      >
+      <p class="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
         Orchestrate your platform's users, permissions, and inventory from a
         unified command center.
       </p>
 
       <div
-        class="mt-10 flex justify-center gap-3 p-1.5 bg-slate-100/80 dark:bg-slate-900/40 rounded-full border border-slate-200 dark:border-white/5 w-fit mx-auto backdrop-blur-md shadow-sm"
+        class="mt-10 flex justify-center gap-3 p-1.5 bg-slate-900/40 rounded-full border border-white/5 w-fit mx-auto backdrop-blur-md shadow-sm"
       >
         <router-link
           to="/admin"
@@ -163,7 +161,7 @@ onMounted(fetchData);
         </router-link>
         <router-link
           to="/admin/inventory"
-          class="px-8 py-2.5 rounded-full font-bold transition-all duration-300 flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white"
+          class="px-8 py-2.5 rounded-full font-bold transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white"
           active-class="bg-blue-600 text-white shadow-lg shadow-blue-600/20"
         >
           <svg
@@ -191,7 +189,7 @@ onMounted(fetchData);
 
     <!-- Search & Filters -->
     <div
-      class="flex flex-col sm:flex-row gap-4 mb-12 items-center p-2 bg-white/50 dark:bg-slate-900/30 rounded-3xl border border-slate-200 dark:border-white/5 backdrop-blur-xl shadow-xl dark:shadow-2xl"
+      class="flex flex-col sm:flex-row gap-4 mb-12 items-center p-2 bg-slate-900/30 rounded-3xl border border-white/5 backdrop-blur-xl shadow-2xl"
     >
       <div class="relative flex-1 w-full group">
         <div
@@ -216,12 +214,12 @@ onMounted(fetchData);
           v-model="searchQuery"
           type="text"
           placeholder="Search users by email..."
-          class="w-full bg-white/50 dark:bg-white/30 border border-slate-200 dark:border-white/5 pl-14 pr-6 py-4 rounded-2xl text-slate-900 dark:text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-600"
+          class="w-full bg-white/10 border border-white/5 pl-14 pr-6 py-4 rounded-2xl text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-slate-600"
         />
       </div>
       <button
         @click="fetchData"
-        class="w-full sm:w-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white px-8 py-4 rounded-2xl font-bold transition-all border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 group disabled:opacity-50"
+        class="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-2xl font-bold transition-all border border-white/10 flex items-center justify-center gap-2 group disabled:opacity-50"
         :disabled="loading"
       >
         <svg
@@ -291,7 +289,7 @@ onMounted(fetchData);
       <div
         v-for="user in filteredUsers"
         :key="user._id"
-        class="flex flex-col p-8 rounded-[32px] transition-all duration-500 hover:-translate-y-2 relative overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/10 hover:border-blue-500/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05),0_0_20px_rgba(59,130,246,0.05)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_20px_rgba(59,130,246,0.1)] group"
+        class="flex flex-col p-8 rounded-[32px] transition-all duration-500 hover:-translate-y-2 relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-blue-500/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_20px_rgba(59,130,246,0.1)] group"
       >
         <!-- Card background glow -->
         <div
@@ -306,9 +304,7 @@ onMounted(fetchData);
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 mb-1">
-              <h3
-                class="text-xl font-bold text-slate-900 dark:text-slate-100 truncate"
-              >
+              <h3 class="text-xl font-bold text-slate-100 truncate">
                 {{ user.email.split("@")[0]
                 }}<span class="text-slate-500 font-medium"
                   >@{{ user.email.split("@")[1] }}</span
@@ -325,7 +321,7 @@ onMounted(fetchData);
               </span>
               <span
                 v-else
-                class="px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider"
+                class="px-2.5 py-0.5 rounded-lg bg-slate-800 border border-white/5 text-slate-400 text-[10px] font-black uppercase tracking-wider"
               >
                 Standard User
               </span>
@@ -336,13 +332,13 @@ onMounted(fetchData);
         <div class="space-y-4 mb-8">
           <div class="flex justify-between text-xs">
             <span class="text-slate-500">System ID</span>
-            <span class="text-slate-700 dark:text-slate-300 font-mono">{{
+            <span class="text-slate-300 font-mono">{{
               user._id.slice(-8)
             }}</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-slate-500">Member Since</span>
-            <span class="text-slate-700 dark:text-slate-300">{{
+            <span class="text-slate-300">{{
               new Date(user.createdAt).toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
@@ -353,7 +349,7 @@ onMounted(fetchData);
         </div>
 
         <div
-          class="flex flex-col gap-2 p-4 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-white/5 relative"
+          class="flex flex-col gap-2 p-4 bg-slate-950/40 rounded-2xl border border-white/5 relative"
         >
           <span
             class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1"
@@ -363,11 +359,11 @@ onMounted(fetchData);
             <label
               v-for="role in availableRoles"
               :key="role.id"
-              class="flex items-center gap-2 cursor-pointer text-xs font-bold px-3 py-2 rounded-xl transition-all duration-200 border border-slate-200 dark:border-white/5"
+              class="flex items-center gap-2 cursor-pointer text-xs font-bold px-3 py-2 rounded-xl transition-all duration-200 border border-white/5"
               :class="[
                 user.roles.includes(role.id)
-                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5',
+                  ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]'
+                  : 'text-slate-500 hover:text-slate-300 hover:bg-white/5',
               ]"
               :title="role.description"
             >
@@ -397,8 +393,8 @@ onMounted(fetchData);
             class="w-full group/btn relative overflow-hidden flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold transition-all duration-300"
             :class="[
               user._id === currentUser?._id
-                ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-200 dark:border-white/5'
-                : 'bg-red-50 dark:bg-red-500/5 text-red-600 dark:text-red-500/70 border border-red-100 dark:border-red-500/10 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-lg hover:shadow-red-500/20',
+                ? 'bg-slate-800/50 text-slate-600 cursor-not-allowed border border-white/5'
+                : 'bg-red-500/5 text-red-500/70 border border-red-500/10 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-lg hover:shadow-red-500/20',
             ]"
             :disabled="user._id === currentUser?._id"
           >

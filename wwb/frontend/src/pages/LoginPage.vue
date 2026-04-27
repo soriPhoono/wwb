@@ -106,19 +106,21 @@ function handleBack() {
 
 <template>
   <div
-    class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-16 bg-gradient-to-br from-slate-50 to-slate-100"
+    class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-16"
   >
     <div class="w-full max-w-md">
       <!-- Card -->
       <div
-        class="bg-white rounded-3xl shadow-2xl shadow-slate-200/50 overflow-hidden"
+        class="bg-slate-900/40 rounded-3xl shadow-2xl border border-white/5 overflow-hidden backdrop-blur-xl"
       >
         <!-- ═══════════════════════════════════════════════════════════════
              STEP 1 — Email & Password
              ═══════════════════════════════════════════════════════════ -->
         <template v-if="!mfaPending">
           <!-- Header -->
-          <div class="bg-slate-900 px-8 pt-10 pb-8 text-center">
+          <div
+            class="bg-slate-900/50 px-8 pt-10 pb-8 text-center border-b border-white/5"
+          >
             <div
               class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-5 shadow-lg shadow-blue-600/30"
             >
@@ -136,7 +138,9 @@ function handleBack() {
                 />
               </svg>
             </div>
-            <h1 class="text-2xl font-extrabold text-white m-0">Welcome Back</h1>
+            <h1 class="text-2xl font-extrabold text-white m-0 tracking-tight">
+              Welcome Back
+            </h1>
             <p class="text-slate-400 text-sm mt-2 m-0">
               Sign in to your SecureCart account
             </p>
@@ -151,7 +155,7 @@ function handleBack() {
             <!-- Error banner -->
             <div
               v-if="error"
-              class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-xl"
+              class="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl"
             >
               <span class="mt-0.5 shrink-0">⚠</span>
               <span>{{ error }}</span>
@@ -160,7 +164,7 @@ function handleBack() {
             <!-- Email -->
             <div>
               <label
-                class="block text-sm font-semibold text-slate-700 mb-1.5"
+                class="block text-sm font-semibold text-slate-300 mb-1.5"
                 for="login-email"
               >
                 Email address
@@ -171,14 +175,14 @@ function handleBack() {
                 type="email"
                 autocomplete="email"
                 placeholder="you@example.com"
-                class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
+                class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
               />
             </div>
 
             <!-- Password -->
             <div>
               <label
-                class="block text-sm font-semibold text-slate-700 mb-1.5"
+                class="block text-sm font-semibold text-slate-300 mb-1.5"
                 for="login-password"
               >
                 Password
@@ -189,7 +193,7 @@ function handleBack() {
                 type="password"
                 autocomplete="current-password"
                 placeholder="••••••••"
-                class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
+                class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
               />
             </div>
 
@@ -203,15 +207,17 @@ function handleBack() {
             </button>
 
             <!-- Register link -->
-            <p class="text-center text-sm text-slate-500 m-0">
-              Don't have an account?
-              <RouterLink
-                to="/register"
-                class="text-blue-600 font-semibold hover:underline"
-              >
-                Create one
-              </RouterLink>
-            </p>
+            <div class="pt-2 text-center">
+              <p class="text-sm text-slate-500 m-0">
+                Don't have an account?
+                <RouterLink
+                  to="/register"
+                  class="text-blue-400 font-semibold hover:text-blue-300 transition-colors"
+                >
+                  Create one
+                </RouterLink>
+              </p>
+            </div>
           </form>
         </template>
 
@@ -220,7 +226,9 @@ function handleBack() {
              ═══════════════════════════════════════════════════════════ -->
         <template v-else>
           <!-- Header -->
-          <div class="bg-slate-900 px-8 pt-10 pb-8 text-center">
+          <div
+            class="bg-slate-900/50 px-8 pt-10 pb-8 text-center border-b border-white/5"
+          >
             <div
               class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500 mb-5 shadow-lg shadow-amber-500/30"
             >
@@ -238,12 +246,12 @@ function handleBack() {
                 />
               </svg>
             </div>
-            <h1 class="text-2xl font-extrabold text-white m-0">
+            <h1 class="text-2xl font-extrabold text-white m-0 tracking-tight">
               Verify Your Identity
             </h1>
             <p class="text-slate-400 text-sm mt-2 m-0">
               We sent a verification code to
-              <span class="text-slate-300 font-medium">{{
+              <span class="text-slate-200 font-medium">{{
                 mfaPhoneMasked
               }}</span>
             </p>
@@ -258,7 +266,7 @@ function handleBack() {
             <!-- Error banner -->
             <div
               v-if="error"
-              class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-xl"
+              class="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl"
             >
               <span class="mt-0.5 shrink-0">⚠</span>
               <span>{{ error }}</span>
@@ -266,9 +274,9 @@ function handleBack() {
 
             <!-- Info banner -->
             <div
-              class="flex items-start gap-3 bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium px-4 py-3 rounded-xl"
+              class="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium px-4 py-3 rounded-xl"
             >
-              <span class="mt-0.5 shrink-0">🔒</span>
+              <span class="mt-0.5 shrink-0 text-blue-400">🔒</span>
               <span
                 >Enter the 6-digit code from the SMS we just sent. It expires in
                 10 minutes.</span
@@ -278,7 +286,7 @@ function handleBack() {
             <!-- Code input -->
             <div>
               <label
-                class="block text-sm font-semibold text-slate-700 mb-1.5"
+                class="block text-sm font-semibold text-slate-300 mb-1.5"
                 for="mfa-code"
               >
                 Verification code
@@ -291,7 +299,7 @@ function handleBack() {
                 autocomplete="one-time-code"
                 maxlength="6"
                 placeholder="000000"
-                class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition placeholder:text-slate-400 placeholder:tracking-[0.5em]"
+                class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition placeholder:text-slate-800 placeholder:tracking-[0.5em]"
               />
             </div>
 
@@ -305,10 +313,10 @@ function handleBack() {
             </button>
 
             <!-- Resend / Back -->
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between pt-2">
               <button
                 type="button"
-                class="text-sm text-slate-500 hover:text-slate-700 font-medium cursor-pointer border-none bg-transparent p-0 transition"
+                class="text-sm text-slate-500 hover:text-slate-300 font-medium cursor-pointer border-none bg-transparent p-0 transition"
                 @click="handleBack"
               >
                 ← Back to login
@@ -320,8 +328,8 @@ function handleBack() {
                 class="text-sm font-semibold cursor-pointer border-none bg-transparent p-0 transition"
                 :class="
                   resendCooldown > 0
-                    ? 'text-slate-400 cursor-not-allowed'
-                    : 'text-blue-600 hover:text-blue-700'
+                    ? 'text-slate-600 cursor-not-allowed'
+                    : 'text-blue-400 hover:text-blue-300'
                 "
                 @click="handleResend"
               >

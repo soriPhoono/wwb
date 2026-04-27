@@ -4,450 +4,366 @@ import { useAuth } from "../composables/useAuth";
 
 const {
   user,
-  fetchMe,
-  mfaPending,
-  mfaPhoneMasked,
-  mfaToken,
+  updateProfile,
+  updatePassword,
   verifyMfa,
   resendMfaCode,
   cancelMfa,
+  mfaPending,
+  mfaPhoneMasked,
 } = useAuth();
 
-const mfaCode = ref("");
-const mfaLoading = ref(false);
-const mfaError = ref("");
-
-// Profile form
 const profileEmail = ref("");
 const profilePhone = ref("");
-const profileError = ref("");
 const profileSuccess = ref("");
-const profileLoading = ref(false);
+const profileError = ref("");
 
-// Password form
 const currentPassword = ref("");
 const newPassword = ref("");
-const confirmNewPassword = ref("");
-const passwordError = ref("");
+const confirmPassword = ref("");
 const passwordSuccess = ref("");
-const passwordLoading = ref(false);
+const passwordError = ref("");
+
+const mfaCode = ref("");
+const mfaError = ref("");
+
+const loading = ref(false);
 
 onMounted(() => {
   if (user.value) {
-    profileEmail.value = user.value.email || "";
+    profileEmail.value = user.value.email;
     profilePhone.value = user.value.phone || "";
   }
 });
 
-async function handleProfileUpdate() {
-  profileError.value = "";
+async function handleUpdateProfile() {
   profileSuccess.value = "";
-
-  if (!profileEmail.value) {
-    profileError.value = "Email is required.";
-    return;
-  }
-
-  profileLoading.value = true;
+  profileError.value = "";
+  loading.value = true;
   try {
-    const res = await fetch("/api/auth/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        email: profileEmail.value,
-        phone: profilePhone.value || null,
-      }),
+    await updateProfile({
+      email: profileEmail.value,
+      phone: profilePhone.value,
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Update failed.");
-
-    // Check if verification is required
-    if (data.mfaRequired) {
-      mfaPending.value = true;
-      mfaToken.value = data.mfaToken;
-      mfaPhoneMasked.value = data.phoneMasked || "";
-      profileSuccess.value = "Verification code sent to your new number.";
-      return;
-    }
-
-    // Refresh user state
-    await fetchMe();
     profileSuccess.value = "Profile updated successfully.";
   } catch (err) {
     profileError.value = err.message;
   } finally {
-    profileLoading.value = false;
+    loading.value = false;
   }
 }
 
-async function handleVerifyMfa() {
-  if (mfaCode.value.length !== 6) {
-    mfaError.value = "Please enter a valid 6-digit code.";
-    return;
-  }
-
-  mfaLoading.value = true;
-  mfaError.value = "";
-  try {
-    await verifyMfa(mfaCode.value);
-    mfaCode.value = "";
-    profileSuccess.value = "Phone number updated successfully.";
-    // Refresh user state is already handled by verifyMfa setting user.value
-  } catch (err) {
-    mfaError.value = err.message;
-  } finally {
-    mfaLoading.value = false;
-  }
-}
-
-async function handlePasswordChange() {
-  passwordError.value = "";
+async function handleUpdatePassword() {
   passwordSuccess.value = "";
+  passwordError.value = "";
 
-  if (!currentPassword.value || !newPassword.value) {
-    passwordError.value = "Both current and new passwords are required.";
-    return;
-  }
-  if (newPassword.value.length < 8) {
-    passwordError.value = "New password must be at least 8 characters.";
-    return;
-  }
-  if (newPassword.value !== confirmNewPassword.value) {
+  if (newPassword.value !== confirmPassword.value) {
     passwordError.value = "New passwords do not match.";
     return;
   }
 
-  passwordLoading.value = true;
+  loading.value = true;
   try {
-    const res = await fetch("/api/auth/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        currentPassword: currentPassword.value,
-        newPassword: newPassword.value,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Password change failed.");
-    passwordSuccess.value = "Password changed successfully.";
+    await updatePassword(currentPassword.value, newPassword.value);
+    passwordSuccess.value = "Password updated successfully.";
     currentPassword.value = "";
     newPassword.value = "";
-    confirmNewPassword.value = "";
+    confirmPassword.value = "";
   } catch (err) {
     passwordError.value = err.message;
   } finally {
-    passwordLoading.value = false;
+    loading.value = false;
   }
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    year: "numeric",
+async function handleVerifyMfa() {
+  mfaError.value = "";
+  loading.value = true;
+  try {
+    await verifyMfa(mfaCode.value);
+    mfaCode.value = "";
+  } catch (err) {
+    mfaError.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function formatDate(date) {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
+    year: "numeric",
   });
 }
 </script>
 
 <template>
-  <div
-    class="min-h-[calc(100vh-80px)] bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4"
-  >
+  <div class="min-h-[calc(100vh-80px)] py-12 px-4">
     <div class="max-w-2xl mx-auto space-y-8">
       <!-- Page heading -->
-      <div class="mb-10">
-        <h1
-          class="text-4xl font-black text-slate-900 m-0 tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text"
-        >
+      <div class="flex items-end justify-between">
+        <h1 class="text-4xl font-black text-white m-0 tracking-tight">
           Account Settings
         </h1>
-        <p class="text-slate-500 mt-2 m-0 text-lg">
-          Manage your profile and security settings
-        </p>
+        <p class="text-slate-500 font-medium m-0">Manage your profile</p>
       </div>
 
-      <!-- Account Details Card -->
+      <!-- Quick Summary Card -->
       <div
-        class="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 overflow-hidden"
+        class="bg-slate-900/40 rounded-2xl shadow-2xl border border-white/5 overflow-hidden backdrop-blur-xl"
       >
-        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+        <div class="px-8 py-5 border-b border-white/5 bg-slate-950/30">
           <h2
-            class="text-lg font-bold text-slate-800 m-0 flex items-center gap-2.5"
+            class="text-lg font-bold text-white m-0 flex items-center gap-2.5"
           >
-            <svg
-              class="w-5 h-5 text-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Account Details
+            <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
+            Profile Summary
           </h2>
         </div>
-        <div class="px-8 py-6" v-if="user">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <p
-                class="text-xs text-slate-400 font-semibold uppercase tracking-wider m-0"
-              >
-                Member Since
-              </p>
-              <p class="text-sm font-semibold text-slate-800 mt-1 m-0">
-                {{ formatDate(user.createdAt) }}
-              </p>
+        <div class="p-8">
+          <div class="flex items-center gap-6">
+            <div
+              class="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-blue-500/20"
+            >
+              {{ user?.email?.charAt(0).toUpperCase() }}
             </div>
-            <div>
-              <p
-                class="text-xs text-slate-400 font-semibold uppercase tracking-wider m-0"
-              >
-                MFA Status
-              </p>
-              <p class="mt-1 m-0">
-                <span
+            <div class="flex-1 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p
+                    class="text-xs font-bold text-slate-500 uppercase tracking-wider m-0"
+                  >
+                    Email Identity
+                  </p>
+                  <p class="text-xl font-bold text-white mt-1 m-0">
+                    {{ user?.email }}
+                  </p>
+                </div>
+                <div class="text-right">
+                  <p
+                    class="text-xs font-bold text-slate-500 uppercase tracking-wider m-0"
+                  >
+                    Member Since
+                  </p>
+                  <p class="text-sm font-semibold text-white mt-1 m-0">
+                    {{ formatDate(user?.createdAt) }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div
                   class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full"
                   :class="
-                    user.mfaEnabled
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    user?.mfaEnabled
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                   "
                 >
                   <span
                     class="w-1.5 h-1.5 rounded-full"
-                    :class="user.mfaEnabled ? 'bg-emerald-500' : 'bg-amber-500'"
+                    :class="
+                      user?.mfaEnabled ? 'bg-emerald-400' : 'bg-amber-400'
+                    "
                   ></span>
-                  {{ user.mfaEnabled ? "Enabled" : "Not enabled" }}
+                  MFA {{ user?.mfaEnabled ? "Enabled" : "Disabled" }}
+                </div>
+                <span
+                  v-if="user?.phone"
+                  class="text-xs text-slate-500 font-medium"
+                >
+                  Verified: {{ user.phone }}
                 </span>
-              </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Profile Card -->
+      <!-- Update Profile -->
       <div
-        class="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 overflow-hidden"
+        class="bg-slate-900/40 rounded-2xl shadow-2xl border border-white/5 overflow-hidden backdrop-blur-xl"
       >
-        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+        <div class="px-8 py-5 border-b border-white/5 bg-slate-950/30">
           <h2
-            class="text-lg font-bold text-slate-800 m-0 flex items-center gap-2.5"
+            class="text-lg font-bold text-white m-0 flex items-center gap-2.5"
           >
-            <svg
-              class="w-5 h-5 text-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            Profile Information
+            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+            Contact Information
           </h2>
         </div>
-        <form
-          class="px-8 py-6 space-y-5"
-          @submit.prevent="handleProfileUpdate"
-          novalidate
-        >
-          <!-- Success / Error -->
+        <form @submit.prevent="handleUpdateProfile" class="p-8 space-y-6">
           <div
             v-if="profileSuccess"
-            class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium px-4 py-3 rounded-xl"
+            class="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium px-4 py-3 rounded-xl"
           >
-            <span class="mt-0.5 shrink-0">✓</span>
-            <span>{{ profileSuccess }}</span>
+            <span class="mt-0.5 shrink-0 text-emerald-400">✓</span>
+            <span class="text-emerald-400">{{ profileSuccess }}</span>
           </div>
           <div
             v-if="profileError"
-            class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-xl"
+            class="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl"
           >
-            <span class="mt-0.5 shrink-0">⚠</span>
+            <span class="mt-0.5 shrink-0">⚠️</span>
             <span>{{ profileError }}</span>
           </div>
 
-          <!-- Email -->
-          <div>
-            <label
-              class="block text-sm font-semibold text-slate-700 mb-1.5"
-              for="profile-email"
-            >
-              Email address
-            </label>
-            <input
-              id="profile-email"
-              v-model="profileEmail"
-              type="email"
-              autocomplete="email"
-              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
-            />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                class="block text-sm font-semibold text-slate-300 mb-1.5"
+                for="profile-email"
+              >
+                Email Address
+              </label>
+              <input
+                id="profile-email"
+                v-model="profileEmail"
+                type="email"
+                autocomplete="email"
+                class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
+              />
+            </div>
+
+            <div>
+              <label
+                class="block text-sm font-semibold text-slate-300 mb-1.5"
+                for="profile-phone"
+              >
+                Phone Number
+              </label>
+              <input
+                id="profile-phone"
+                v-model="profilePhone"
+                type="tel"
+                autocomplete="tel"
+                placeholder="+1 555 000 0000"
+                class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
+              />
+            </div>
           </div>
 
-          <!-- Phone -->
-          <div>
-            <label
-              class="block text-sm font-semibold text-slate-700 mb-1.5"
-              for="profile-phone"
-            >
-              Phone number
-              <span class="text-slate-400 font-normal ml-1">(optional)</span>
-            </label>
-            <input
-              id="profile-phone"
-              v-model="profilePhone"
-              type="tel"
-              autocomplete="tel"
-              placeholder="+1 555 000 0000"
-              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
-            />
-          </div>
-
-          <div class="flex justify-end">
+          <div class="flex justify-end pt-2">
             <button
               type="submit"
-              :disabled="profileLoading"
-              class="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all duration-200 cursor-pointer border-none text-sm"
+              :disabled="loading"
+              class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer border-none"
             >
-              {{ profileLoading ? "Saving…" : "Save Changes" }}
+              {{ loading ? "Saving..." : "Update Profile" }}
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Password Card -->
+      <!-- Update Password -->
       <div
-        class="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 overflow-hidden"
+        class="bg-slate-900/40 rounded-2xl shadow-2xl border border-white/5 overflow-hidden backdrop-blur-xl"
       >
-        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+        <div class="px-8 py-5 border-b border-white/5 bg-slate-950/30">
           <h2
-            class="text-lg font-bold text-slate-800 m-0 flex items-center gap-2.5"
+            class="text-lg font-bold text-white m-0 flex items-center gap-2.5"
           >
-            <svg
-              class="w-5 h-5 text-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-            Change Password
+            <span class="w-2 h-6 bg-amber-500 rounded-full"></span>
+            Security & Password
           </h2>
         </div>
-        <form
-          class="px-8 py-6 space-y-5"
-          @submit.prevent="handlePasswordChange"
-          novalidate
-        >
-          <!-- Success / Error -->
+        <form @submit.prevent="handleUpdatePassword" class="p-8 space-y-6">
           <div
             v-if="passwordSuccess"
-            class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium px-4 py-3 rounded-xl"
+            class="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium px-4 py-3 rounded-xl"
           >
-            <span class="mt-0.5 shrink-0">✓</span>
-            <span>{{ passwordSuccess }}</span>
+            <span class="mt-0.5 shrink-0 text-emerald-400">✓</span>
+            <span class="text-emerald-400">{{ passwordSuccess }}</span>
           </div>
           <div
             v-if="passwordError"
-            class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-xl"
+            class="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl"
           >
-            <span class="mt-0.5 shrink-0">⚠</span>
+            <span class="mt-0.5 shrink-0">⚠️</span>
             <span>{{ passwordError }}</span>
           </div>
 
-          <!-- Current password -->
-          <div>
-            <label
-              class="block text-sm font-semibold text-slate-700 mb-1.5"
-              for="current-password"
-            >
-              Current password
-            </label>
-            <input
-              id="current-password"
-              v-model="currentPassword"
-              type="password"
-              autocomplete="current-password"
-              placeholder="••••••••"
-              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
-            />
+          <div class="space-y-5">
+            <div>
+              <label
+                class="block text-sm font-semibold text-slate-300 mb-1.5"
+                for="current-password"
+              >
+                Current Password
+              </label>
+              <input
+                id="current-password"
+                v-model="currentPassword"
+                type="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+                class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  class="block text-sm font-semibold text-slate-300 mb-1.5"
+                  for="new-password"
+                >
+                  New Password
+                </label>
+                <input
+                  id="new-password"
+                  v-model="newPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Min. 8 characters"
+                  class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-semibold text-slate-300 mb-1.5"
+                  for="confirm-password"
+                >
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirm-password"
+                  v-model="confirmPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-600"
+                />
+              </div>
+            </div>
           </div>
 
-          <!-- New password -->
-          <div>
-            <label
-              class="block text-sm font-semibold text-slate-700 mb-1.5"
-              for="new-password"
-            >
-              New password
-            </label>
-            <input
-              id="new-password"
-              v-model="newPassword"
-              type="password"
-              autocomplete="new-password"
-              placeholder="Min. 8 characters"
-              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
-            />
-          </div>
-
-          <!-- Confirm new password -->
-          <div>
-            <label
-              class="block text-sm font-semibold text-slate-700 mb-1.5"
-              for="confirm-new-password"
-            >
-              Confirm new password
-            </label>
-            <input
-              id="confirm-new-password"
-              v-model="confirmNewPassword"
-              type="password"
-              autocomplete="new-password"
-              placeholder="••••••••"
-              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400"
-            />
-          </div>
-
-          <div class="flex justify-end">
+          <div class="flex justify-end pt-2">
             <button
               type="submit"
-              :disabled="passwordLoading"
-              class="bg-slate-800 hover:bg-slate-900 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-slate-800/20 transition-all duration-200 cursor-pointer border-none text-sm"
+              :disabled="loading"
+              class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer border-none"
             >
-              {{ passwordLoading ? "Updating…" : "Update Password" }}
+              {{ loading ? "Saving..." : "Change Password" }}
             </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- MFA Modal -->
+    <!-- MFA Verification Modal (similar to register/login for consistency) -->
     <div
       v-if="mfaPending"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300"
     >
       <div
-        class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200"
+        class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-white/10"
       >
-        <div class="bg-slate-900 p-8 text-center">
+        <div class="bg-slate-950/50 p-8 text-center border-b border-white/5">
           <div
-            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500 mb-5 shadow-lg shadow-blue-500/30"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-5 shadow-lg shadow-blue-600/30"
           >
             <svg
               class="w-7 h-7 text-white"
@@ -463,7 +379,9 @@ function formatDate(dateStr) {
               />
             </svg>
           </div>
-          <h2 class="text-xl font-bold text-white m-0">Verify your phone</h2>
+          <h2 class="text-xl font-bold text-white m-0 tracking-tight">
+            Verify Security Action
+          </h2>
           <p class="text-slate-400 text-sm mt-2 m-0">
             We sent a code to {{ mfaPhoneMasked }}
           </p>
@@ -472,7 +390,7 @@ function formatDate(dateStr) {
         <div class="p-8 space-y-6">
           <div
             v-if="mfaError"
-            class="bg-red-50 text-red-600 text-xs font-medium p-3 rounded-lg border border-red-100 flex items-center gap-2"
+            class="bg-red-500/10 text-red-400 text-xs font-medium p-3 rounded-lg border border-red-500/20 flex items-center gap-2"
           >
             <span>⚠️</span>
             <span>{{ mfaError }}</span>
@@ -489,29 +407,29 @@ function formatDate(dateStr) {
               type="text"
               maxlength="6"
               placeholder="000000"
-              class="w-full text-center text-3xl font-mono tracking-[0.5em] border-2 border-slate-100 rounded-2xl py-4 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-200"
+              class="w-full bg-slate-950/50 text-center text-3xl font-mono tracking-[0.5em] border-2 border-white/10 rounded-2xl py-4 text-white focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-800"
               @keyup.enter="handleVerifyMfa"
             />
           </div>
 
           <button
             @click="handleVerifyMfa"
-            :disabled="mfaLoading || mfaCode.length !== 6"
+            :disabled="loading || mfaCode.length !== 6"
             class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer border-none"
           >
-            {{ mfaLoading ? "Verifying..." : "Verify & Update" }}
+            {{ loading ? "Verifying..." : "Confirm Action" }}
           </button>
 
           <div class="flex items-center justify-between pt-2">
             <button
               @click="resendMfaCode"
-              class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors bg-transparent border-none cursor-pointer"
+              class="text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors bg-transparent border-none cursor-pointer"
             >
               Resend code
             </button>
             <button
               @click="cancelMfa"
-              class="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors bg-transparent border-none cursor-pointer"
+              class="text-sm font-semibold text-red-400 hover:text-red-300 transition-colors bg-transparent border-none cursor-pointer"
             >
               Cancel
             </button>

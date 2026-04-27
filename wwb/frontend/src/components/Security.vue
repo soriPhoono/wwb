@@ -3,14 +3,17 @@
 <template>
   <section
     id="security"
-    class="py-20 bg-slate-900 text-white relative border-y border-slate-800"
+    class="py-20 bg-slate-950/50 text-white relative border-y border-white/5"
   >
     <div class="container-custom">
       <div class="mb-14 text-center md:text-left">
-        <span class="eyebrow text-blue-400">Security Focus</span>
-        <h2 class="section-heading text-white">
-          Key e-commerce security challenges and planned protections
+        <span class="eyebrow">Security Focus</span>
+        <h2 class="section-heading text-white mb-2">
+          Key e-commerce security challenges
         </h2>
+        <p class="text-slate-400 text-lg">
+          Planned protections for a secure storefront demo
+        </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">

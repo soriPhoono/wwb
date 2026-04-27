@@ -8,7 +8,9 @@ const { isLoggedIn, user } = useAuth();
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md">
+  <header
+    class="sticky top-0 z-50 bg-black text-white border-b border-slate-800/50 shadow-xl"
+  >
     <div
       class="container-custom flex items-center justify-between gap-5 py-4 flex-wrap"
     >

@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
+  <footer class="bg-black text-slate-500 py-12 border-t border-slate-900">
     <div
       class="max-w-[1120px] w-[92%] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left"
     >

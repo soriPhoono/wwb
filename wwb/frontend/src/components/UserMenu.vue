@@ -24,7 +24,7 @@ function initials(email) {
     <!-- Avatar button -->
     <button
       id="user-menu-button"
-      class="flex items-center gap-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl px-3 py-2 cursor-pointer border-none transition-colors"
+      class="flex items-center gap-2.5 bg-slate-800/50 hover:bg-slate-700 text-white rounded-xl px-3 py-2 cursor-pointer border border-white/5 transition-colors"
       @click="open = !open"
     >
       <!-- Avatar circle -->
@@ -58,17 +58,17 @@ function initials(email) {
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 py-2 z-[1100]"
+        class="absolute right-0 top-full mt-2 w-56 bg-slate-900 rounded-2xl shadow-2xl border border-white/10 py-2 z-[1100]"
         @click.stop
       >
         <!-- User info header -->
-        <div class="px-4 py-3 border-b border-slate-100">
+        <div class="px-4 py-3 border-b border-white/5">
           <p
             class="text-xs text-slate-400 font-semibold uppercase tracking-wider m-0"
           >
             Signed in as
           </p>
-          <p class="text-sm font-bold text-slate-800 truncate m-0 mt-0.5">
+          <p class="text-sm font-bold text-white truncate m-0 mt-0.5">
             {{ user.email }}
           </p>
         </div>
@@ -77,7 +77,7 @@ function initials(email) {
         <div class="py-1">
           <RouterLink
             to="/account"
-            class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer bg-transparent border-none no-underline"
+            class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition-colors cursor-pointer bg-transparent border-none no-underline"
             @click="open = false"
           >
             <svg
@@ -96,10 +96,10 @@ function initials(email) {
             My Account
           </RouterLink>
 
-          <hr class="my-1 border-slate-100" />
+          <hr class="my-1 border-white/5" />
 
           <button
-            class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer bg-transparent border-none"
+            class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer bg-transparent border-none"
             @click="handleLogout"
           >
             <svg

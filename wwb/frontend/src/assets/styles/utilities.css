@@ -22,15 +22,15 @@
 }
 
 @utility btn-secondary {
-  @apply btn-hero bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:shadow-md;
+  @apply btn-hero bg-slate-800 text-white border border-slate-700 shadow-sm hover:bg-slate-700 hover:shadow-md;
 }
 
 @utility section-heading {
-  @apply text-3xl md:text-4xl lg:text-5xl font-extrabold mb-5 tracking-tight;
+  @apply text-3xl md:text-4xl lg:text-5xl font-extrabold mb-5 tracking-tight text-white;
 }
 
 @utility eyebrow {
-  @apply inline-block mb-3 uppercase tracking-widest text-sm font-bold;
+  @apply inline-block mb-3 uppercase tracking-widest text-sm font-bold text-blue-400;
 }
 
 @utility glass {
@@ -39,19 +39,19 @@
 }
 
 @utility card-premium {
-  @apply rounded-[28px] p-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border;
-  background: color-mix(in srgb, var(--color-slate-800), transparent 60%);
-  border-color: color-mix(in srgb, var(--color-white), transparent 92%);
+  @apply rounded-[28px] p-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border glass;
+  background: rgba(30, 41, 59, 0.4); /* slate-800/40 */
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 @utility card-base {
-  @apply bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300;
+  @apply bg-slate-900/40 glass p-8 rounded-3xl border border-slate-800/50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300;
 }
 
 @utility card-dark {
-  @apply bg-slate-800/80 backdrop-blur p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 hover:-translate-y-1.5 transition-all duration-300 shadow-lg;
+  @apply bg-slate-900/60 glass p-8 rounded-3xl border border-white/5 hover:bg-slate-800/80 hover:border-blue-500/20 hover:-translate-y-1.5 transition-all duration-300 shadow-2xl;
 }
 
 @utility stat-block {
-  @apply p-6 text-center rounded-2xl hover:bg-slate-50 transition-colors duration-300;
+  @apply p-6 text-center rounded-2xl hover:bg-slate-800/40 transition-colors duration-300;
 }
