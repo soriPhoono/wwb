@@ -28,9 +28,9 @@ const { isLoggedIn, user } = useAuth();
           >Home</RouterLink
         >
         <RouterLink
-          to="/#catalog"
+          to="/shop"
           class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
-          >Catalog</RouterLink
+          >Shop</RouterLink
         >
         <RouterLink
           to="/#security"

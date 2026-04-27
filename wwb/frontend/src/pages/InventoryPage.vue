@@ -14,6 +14,7 @@ const editingProduct = ref(null);
 const form = ref({
   name: "",
   description: "",
+  details: "",
   price: 0,
   category: "General",
   stock: 0,
@@ -114,6 +115,7 @@ function openAddModal() {
   form.value = {
     name: "",
     description: "",
+    details: "",
     price: 0,
     category: "General",
     stock: 0,
@@ -392,6 +394,19 @@ onMounted(fetchProducts);
             <textarea
               v-model="form.description"
               rows="3"
+              class="w-full bg-slate-900/60 border border-white/10 p-4 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
+            ></textarea>
+          </div>
+
+          <div class="space-y-2">
+            <label
+              class="text-sm font-bold text-slate-400 uppercase tracking-wider"
+              >Full Details (Extended)</label
+            >
+            <textarea
+              v-model="form.details"
+              rows="5"
+              placeholder="Technical specs, long description, etc."
               class="w-full bg-slate-900/60 border border-white/10 p-4 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
             ></textarea>
           </div>

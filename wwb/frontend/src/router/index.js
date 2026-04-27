@@ -7,9 +7,11 @@ import RegisterPage from "../pages/RegisterPage.vue";
 import AccountPage from "../pages/AccountPage.vue";
 import AdminPage from "../pages/AdminPage.vue";
 import InventoryPage from "../pages/InventoryPage.vue";
+import ShopPage from "../pages/ShopPage.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomePage },
+  { path: "/shop", name: "shop", component: ShopPage },
   {
     path: "/login",
     name: "login",
