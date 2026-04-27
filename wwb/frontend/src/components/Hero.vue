@@ -6,15 +6,15 @@
     class="bg-gradient-to-br from-blue-50 via-white to-slate-50 py-20 lg:py-28 relative overflow-hidden"
   >
     <div
-      class="max-w-[1120px] w-[92%] mx-auto grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-center relative z-10"
+      class="container-custom grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-center relative z-10"
     >
       <div>
         <span
-          class="inline-block mb-4 uppercase tracking-wider text-xs font-bold text-blue-700 bg-blue-100/80 px-3 py-1.5 rounded-full shadow-sm"
+          class="eyebrow text-blue-700 bg-blue-100/80 px-3 py-1.5 rounded-full shadow-sm text-xs"
           >Course Project Proposal Demo</span
         >
         <h2
-          class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-slate-900 mb-6 tracking-tight"
+          class="section-heading text-slate-900 !text-4xl md:!text-5xl lg:!text-6xl !leading-tight mb-6"
         >
           Designing a secure e-commerce website with MFA and protected payments
         </h2>
@@ -28,17 +28,10 @@
         </p>
 
         <div class="flex gap-4 flex-wrap mb-12">
-          <RouterLink
-            to="/shop"
-            class="inline-block text-center no-underline px-8 py-3.5 font-bold rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-200"
-          >
+          <RouterLink to="/shop" class="btn-primary">
             Browse Products
           </RouterLink>
-          <a
-            class="inline-block text-center no-underline px-8 py-3.5 font-bold rounded-xl bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-            href="#security"
-            >View Security Features</a
-          >
+          <a class="btn-secondary" href="#security">View Security Features</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">

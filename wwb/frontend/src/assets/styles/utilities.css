@@ -1,0 +1,57 @@
+@utility container-custom {
+  max-width: 1120px;
+  width: 92%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@utility nav-link {
+  @apply text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors;
+}
+
+@utility btn-base {
+  @apply cursor-pointer rounded-xl font-semibold text-sm transition-colors no-underline px-4 py-2.5;
+}
+
+@utility btn-hero {
+  @apply inline-block text-center no-underline px-8 py-3.5 font-bold rounded-xl transition-all duration-200 hover:-translate-y-0.5;
+}
+
+@utility btn-primary {
+  @apply btn-hero bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700;
+}
+
+@utility btn-secondary {
+  @apply btn-hero bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:shadow-md;
+}
+
+@utility section-heading {
+  @apply text-3xl md:text-4xl lg:text-5xl font-extrabold mb-5 tracking-tight;
+}
+
+@utility eyebrow {
+  @apply inline-block mb-3 uppercase tracking-widest text-sm font-bold;
+}
+
+@utility glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@utility card-premium {
+  @apply rounded-[28px] p-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border;
+  background: color-mix(in srgb, var(--color-slate-800), transparent 60%);
+  border-color: color-mix(in srgb, var(--color-white), transparent 92%);
+}
+
+@utility card-base {
+  @apply bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300;
+}
+
+@utility card-dark {
+  @apply bg-slate-800/80 backdrop-blur p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 hover:-translate-y-1.5 transition-all duration-300 shadow-lg;
+}
+
+@utility stat-block {
+  @apply p-6 text-center rounded-2xl hover:bg-slate-50 transition-colors duration-300;
+}

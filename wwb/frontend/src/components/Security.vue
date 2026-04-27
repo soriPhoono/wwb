@@ -5,23 +5,16 @@
     id="security"
     class="py-20 bg-slate-900 text-white relative border-y border-slate-800"
   >
-    <div class="max-w-[1120px] w-[92%] mx-auto">
+    <div class="container-custom">
       <div class="mb-14 text-center md:text-left">
-        <span
-          class="inline-block mb-3 uppercase tracking-wider text-sm font-bold text-blue-400 tracking-widest"
-          >Security Focus</span
-        >
-        <h2
-          class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-5 tracking-tight text-white"
-        >
+        <span class="eyebrow text-blue-400">Security Focus</span>
+        <h2 class="section-heading text-white">
           Key e-commerce security challenges and planned protections
         </h2>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-        <article
-          class="bg-slate-800/80 backdrop-blur p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 hover:-translate-y-1.5 transition-all duration-300 shadow-lg"
-        >
+        <article class="card-dark">
           <h3
             class="mt-0 mb-4 text-2xl font-bold text-white flex items-center gap-3"
           >
@@ -34,9 +27,7 @@
           </p>
         </article>
 
-        <article
-          class="bg-slate-800/80 backdrop-blur p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 hover:-translate-y-1.5 transition-all duration-300 shadow-lg"
-        >
+        <article class="card-dark">
           <h3
             class="mt-0 mb-4 text-2xl font-bold text-white flex items-center gap-3"
           >
@@ -48,9 +39,7 @@
           </p>
         </article>
 
-        <article
-          class="bg-slate-800/80 backdrop-blur p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 hover:-translate-y-1.5 transition-all duration-300 shadow-lg"
-        >
+        <article class="card-dark">
           <h3
             class="mt-0 mb-4 text-2xl font-bold text-white flex items-center gap-3"
           >
@@ -62,9 +51,7 @@
           </p>
         </article>
 
-        <article
-          class="bg-slate-800/80 backdrop-blur p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 hover:-translate-y-1.5 transition-all duration-300 shadow-lg"
-        >
+        <article class="card-dark">
           <h3
             class="mt-0 mb-4 text-2xl font-bold text-white flex items-center gap-3"
           >

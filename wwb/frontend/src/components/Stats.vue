@@ -3,11 +3,9 @@
 <template>
   <section class="py-12 bg-white relative z-20 border-b border-slate-100">
     <div
-      class="max-w-[1120px] w-[92%] mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-10"
+      class="container-custom grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-10"
     >
-      <div
-        class="p-6 text-center rounded-2xl hover:bg-slate-50 transition-colors duration-300"
-      >
+      <div class="stat-block">
         <h3
           class="m-0 text-4xl md:text-5xl font-extrabold text-blue-600 tracking-tight"
         >
@@ -17,9 +15,7 @@
           Demo products in the catalog
         </p>
       </div>
-      <div
-        class="p-6 text-center rounded-2xl hover:bg-slate-50 transition-colors duration-300"
-      >
+      <div class="stat-block">
         <h3
           class="m-0 text-4xl md:text-5xl font-extrabold text-blue-600 tracking-tight"
         >
@@ -29,9 +25,7 @@
           Authentication model planned for users
         </p>
       </div>
-      <div
-        class="p-6 text-center rounded-2xl hover:bg-slate-50 transition-colors duration-300"
-      >
+      <div class="stat-block">
         <h3
           class="m-0 text-4xl md:text-5xl font-extrabold text-blue-600 tracking-tight"
         >
@@ -41,9 +35,7 @@
           Credit cards stored locally in the design
         </p>
       </div>
-      <div
-        class="p-6 text-center rounded-2xl hover:bg-slate-50 transition-colors duration-300"
-      >
+      <div class="stat-block">
         <h3
           class="m-0 text-4xl md:text-5xl font-extrabold text-blue-600 tracking-tight"
         >

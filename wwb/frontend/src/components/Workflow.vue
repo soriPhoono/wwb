@@ -2,15 +2,12 @@
 
 <template>
   <section id="workflow" class="py-20 bg-white relative">
-    <div class="max-w-[1120px] w-[92%] mx-auto">
+    <div class="container-custom">
       <div class="mb-14 text-center md:text-left">
-        <span
-          class="inline-block mb-3 uppercase tracking-wider text-sm font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full"
+        <span class="eyebrow text-blue-700 bg-blue-100 px-3 py-1 rounded-full"
           >Store Workflow</span
         >
-        <h2
-          class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight"
-        >
+        <h2 class="section-heading text-slate-900">
           How the secure buying process would work
         </h2>
       </div>
@@ -41,9 +38,7 @@
           </p>
         </div>
 
-        <div
-          class="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden group z-10"
-        >
+        <div class="card-base relative overflow-hidden group z-10">
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-blue-600 rounded-full opacity-5 group-hover:scale-150 transition-transform duration-500"
           ></div>
@@ -59,9 +54,7 @@
           </p>
         </div>
 
-        <div
-          class="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden group z-10"
-        >
+        <div class="card-base relative overflow-hidden group z-10">
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-blue-600 rounded-full opacity-5 group-hover:scale-150 transition-transform duration-500"
           ></div>
@@ -77,9 +70,7 @@
           </p>
         </div>
 
-        <div
-          class="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden group z-10"
-        >
+        <div class="card-base relative overflow-hidden group z-10">
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-blue-600 rounded-full opacity-5 group-hover:scale-150 transition-transform duration-500"
           ></div>

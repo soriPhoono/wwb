@@ -10,7 +10,7 @@ const { isLoggedIn, user } = useAuth();
 <template>
   <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md">
     <div
-      class="max-w-[1120px] w-[92%] mx-auto flex items-center justify-between gap-5 py-4 flex-wrap"
+      class="container-custom flex items-center justify-between gap-5 py-4 flex-wrap"
     >
       <div class="brand">
         <RouterLink to="/" class="no-underline text-white">
@@ -22,31 +22,11 @@ const { isLoggedIn, user } = useAuth();
       </div>
 
       <nav class="flex gap-5 flex-wrap">
-        <RouterLink
-          to="/#home"
-          class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
-          >Home</RouterLink
-        >
-        <RouterLink
-          to="/shop"
-          class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
-          >Shop</RouterLink
-        >
-        <RouterLink
-          to="/#security"
-          class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
-          >Security</RouterLink
-        >
-        <RouterLink
-          to="/#workflow"
-          class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
-          >Checkout</RouterLink
-        >
-        <RouterLink
-          to="/#about"
-          class="text-slate-200 font-semibold no-underline hover:text-blue-300 transition-colors"
-          >About</RouterLink
-        >
+        <RouterLink to="/#home" class="nav-link">Home</RouterLink>
+        <RouterLink to="/shop" class="nav-link">Shop</RouterLink>
+        <RouterLink to="/#security" class="nav-link">Security</RouterLink>
+        <RouterLink to="/#workflow" class="nav-link">Checkout</RouterLink>
+        <RouterLink to="/#about" class="nav-link">About</RouterLink>
         <RouterLink
           v-if="user?.roles?.includes('admin')"
           to="/admin"
@@ -61,7 +41,7 @@ const { isLoggedIn, user } = useAuth();
           v-if="!isLoggedIn"
           to="/login"
           id="login-button"
-          class="cursor-pointer rounded-xl bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 font-semibold text-sm transition-colors border border-white/20 no-underline"
+          class="btn-base bg-white/10 hover:bg-white/20 border border-white/20 text-white"
         >
           Sign In
         </RouterLink>
@@ -71,7 +51,7 @@ const { isLoggedIn, user } = useAuth();
         <button
           v-if="canUseCart"
           id="cart-button"
-          class="cursor-pointer rounded-xl bg-blue-600 text-white px-4 py-2.5 font-bold hover:bg-blue-700 transition-colors shadow-sm text-sm"
+          class="btn-base bg-blue-600 text-white hover:bg-blue-700 shadow-sm font-bold"
           @click="toggleCart"
         >
           Cart ({{ cartCount }})
