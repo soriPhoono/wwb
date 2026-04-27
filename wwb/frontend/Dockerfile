@@ -1,5 +1,5 @@
 # Stage 1: Build the Vue application
-FROM node:lts-alpine AS build
+FROM node:24.15.0-alpine AS build
 
 # Set working directory
 WORKDIR /app
@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve the built application using Caddy
-FROM caddy:2-alpine
+FROM caddy:2.8.4-alpine
 
 # Copy the compiled static files from the build stage
 COPY --from=build /app/dist /srv

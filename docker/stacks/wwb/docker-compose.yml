@@ -3,7 +3,7 @@ services:
   # MongoDB — primary data store
   # ──────────────────────────────────────────────
   mongo:
-    image: mongo:latest
+    image: mongo:8.2.7
     configs:
       - source: mongo-init
         target: /docker-entrypoint-initdb.d/init.js
@@ -33,7 +33,7 @@ services:
   # Mongo Express — web-based MongoDB admin UI
   # ──────────────────────────────────────────────
   mongo-express:
-    image: mongo-express:latest
+    image: mongo-express:1.0.2
     entrypoint: ["/bin/sh", "/configs/entrypoint.sh"]
     configs:
       - source: mongo-express-entrypoint
@@ -64,7 +64,7 @@ services:
   # Backend — Express + Node.js API
   # ──────────────────────────────────────────────
   backend:
-    image: ghcr.io/soriphoono/wwb-backend:latest
+    image: ghcr.io/soriphoono/wwb-backend:0.1.0
     depends_on:
       - mongo
     secrets:
@@ -101,7 +101,7 @@ services:
   # Caddy proxies /api/* → backend:3000
   # ──────────────────────────────────────────────
   frontend:
-    image: ghcr.io/soriphoono/wwb-frontend:latest
+    image: ghcr.io/soriphoono/wwb-frontend:0.1.0
     depends_on:
       - backend
     networks:
@@ -116,7 +116,7 @@ services:
   # Forwards cloudflare edge → frontend:80
   # ──────────────────────────────────────────────
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.3.0
     # Read token from Swarm secret file and pass to cloudflared
     command: tunnel --no-autoupdate run
     depends_on:

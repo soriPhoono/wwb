@@ -1,6 +1,6 @@
 services:
   swarm-cd:
-    image: ghcr.io/m-adawi/swarm-cd:latest
+    image: ghcr.io/m-adawi/swarm-cd:v1.10.0
     configs:
       - source: swarm-cd_config
         target: /app/config.yml

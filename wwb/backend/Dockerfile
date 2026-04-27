@@ -1,4 +1,4 @@
-FROM node:lts-slim
+FROM node:24.15.0-slim
 
 # Set working directory inside the container
 WORKDIR /app
