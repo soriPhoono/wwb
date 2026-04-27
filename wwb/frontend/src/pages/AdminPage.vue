@@ -216,7 +216,7 @@ onMounted(fetchData);
           v-model="searchQuery"
           type="text"
           placeholder="Search users by email..."
-          class="w-full bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 pl-14 pr-6 py-4 rounded-2xl text-slate-900 dark:text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-600"
+          class="w-full bg-white/50 dark:bg-white/30 border border-slate-200 dark:border-white/5 pl-14 pr-6 py-4 rounded-2xl text-slate-900 dark:text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-600"
         />
       </div>
       <button
