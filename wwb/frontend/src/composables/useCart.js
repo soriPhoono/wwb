@@ -121,18 +121,18 @@ function simplifyCart(fullCart) {
   }));
 }
 
-export function useCart() {
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/products");
-      if (res.ok) {
-        products.value = await res.json();
-      }
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
+export const fetchProducts = async () => {
+  try {
+    const res = await fetch("/api/products");
+    if (res.ok) {
+      products.value = await res.json();
     }
-  };
+  } catch (err) {
+    console.error("Failed to fetch products:", err);
+  }
+};
 
+export function useCart() {
   // Fetch products on initial composable usage if empty
   if (products.value.length === 0) {
     fetchProducts();
@@ -298,5 +298,6 @@ export function useCart() {
     syncCart,
     clearCart,
     getAvailableStock,
+    fetchProducts,
   };
 }
