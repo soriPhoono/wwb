@@ -1,37 +1,8 @@
 import { ref, computed, watch } from "vue";
 import { user } from "./useAuthState.js";
 
-// Pre-defined static products array (could be moved to a separate file or fetched from backend later)
-export const products = [
-  {
-    id: 1,
-    name: "Network Security Handbook",
-    price: 29.99,
-    category: "Books",
-    description: "A sample product for the secure e-commerce catalog.",
-  },
-  {
-    id: 2,
-    name: "MFA Setup Guide",
-    price: 19.99,
-    category: "Guides",
-    description: "A beginner-friendly guide to multifactor authentication.",
-  },
-  {
-    id: 3,
-    name: "Secure Checkout Toolkit",
-    price: 39.99,
-    category: "Software",
-    description: "A demo toolkit representing checkout protection resources.",
-  },
-  {
-    id: 4,
-    name: "Privacy Protection Bundle",
-    price: 24.99,
-    category: "Bundles",
-    description: "A bundle representing privacy and security support items.",
-  },
-];
+// Reactive products array fetched from backend
+export const products = ref([]);
 
 // Cookie utilities
 function setCookie(name, value, days) {
@@ -128,7 +99,9 @@ watch(
 function hydrateCart(simpleCart) {
   return simpleCart
     .map((item) => {
-      const product = products.find((p) => p.id === item.productId);
+      const product = products.value.find(
+        (p) => (p.productId || p.id) === item.productId,
+      );
       if (!product) return null;
       return {
         ...product,
@@ -143,12 +116,28 @@ function hydrateCart(simpleCart) {
  */
 function simplifyCart(fullCart) {
   return fullCart.map((item) => ({
-    productId: item.id,
+    productId: item.productId || item.id,
     quantity: item.quantity,
   }));
 }
 
 export function useCart() {
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+      if (res.ok) {
+        products.value = await res.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+    }
+  };
+
+  // Fetch products on initial composable usage if empty
+  if (products.value.length === 0) {
+    fetchProducts();
+  }
+
   const fetchCart = async () => {
     try {
       const res = await fetch("/api/cart", { credentials: "include" });
@@ -190,7 +179,9 @@ export function useCart() {
   };
 
   const addToCart = async (productId) => {
-    const product = products.find((item) => item.id === productId);
+    const product = products.value.find(
+      (item) => (item.productId || item.id) === productId,
+    );
     if (!product) return;
 
     const existingItem = cart.value.find((item) => item.id === productId);
