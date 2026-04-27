@@ -80,7 +80,7 @@ router.post("/", requireAuth, async (req, res) => {
     // Get all products to check stock
     const products = await Product.find({
       productId: { $in: validCart.map((i) => i.productId) },
-    });
+    }).lean();
     const productMap = {};
     products.forEach((p) => {
       productMap[p.productId] = p;

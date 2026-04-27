@@ -26,6 +26,7 @@ router.get("/roles", requireAuth, requireAdmin, (req, res) => {
 router.get("/users", requireAuth, requireAdmin, async (req, res) => {
   try {
     const users = await User.find({})
+      .lean()
       .select("-passwordHash")
       .sort({ createdAt: -1 });
     res.json(users);

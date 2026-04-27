@@ -50,6 +50,8 @@ const productSchema = new Schema(
   },
 );
 
+productSchema.index({ isActive: 1, createdAt: -1 });
+
 // Pre-save hook to auto-increment productId if not provided
 // Note: In a production environment, a separate counter collection is better.
 // For this school project, we'll keep it simple or just rely on the user/admin to provide it.

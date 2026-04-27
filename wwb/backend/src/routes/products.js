@@ -7,6 +7,40 @@ import upload from "../middleware/upload.js";
 
 const router = Router();
 
+// ── Cache Configuration ────────────────────────────────────────────
+let cachedClaimedCounts = null;
+let lastClaimedCountsUpdate = 0;
+const CLAIMED_COUNTS_TTL = 15000; // 15 seconds
+
+async function getClaimedCountsMap() {
+  const now = Date.now();
+  if (
+    cachedClaimedCounts &&
+    now - lastClaimedCountsUpdate < CLAIMED_COUNTS_TTL
+  ) {
+    return cachedClaimedCounts;
+  }
+
+  const claimedCounts = await User.aggregate([
+    { $unwind: "$cart" },
+    {
+      $group: {
+        _id: "$cart.productId",
+        totalClaimed: { $sum: "$cart.quantity" },
+      },
+    },
+  ]);
+
+  const countsMap = {};
+  claimedCounts.forEach((c) => {
+    countsMap[c._id] = c.totalClaimed;
+  });
+
+  cachedClaimedCounts = countsMap;
+  lastClaimedCountsUpdate = now;
+  return countsMap;
+}
+
 // ── Public Routes ──────────────────────────────────────────────────
 
 /**
@@ -15,32 +49,16 @@ const router = Router();
  */
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
+    const products = await Product.find({ isActive: true })
+      .lean()
+      .sort({ createdAt: -1 });
 
-    // Aggregate claimed counts from all users' carts
-    const claimedCounts = await User.aggregate([
-      { $unwind: "$cart" },
-      {
-        $group: {
-          _id: "$cart.productId",
-          totalClaimed: { $sum: "$cart.quantity" },
-        },
-      },
-    ]);
-
-    // Map counts for easy lookup
-    const countsMap = {};
-    claimedCounts.forEach((c) => {
-      countsMap[c._id] = c.totalClaimed;
-    });
+    const countsMap = await getClaimedCountsMap();
 
     // Attach claimedCount to each product
     const enrichedProducts = products.map((p) => {
-      const productObj = p.toObject();
-      productObj.claimedCount = countsMap[p.productId || p._id] || 0;
-      return productObj;
+      p.claimedCount = countsMap[p.productId || p._id] || 0;
+      return p;
     });
 
     res.json(enrichedProducts);
@@ -56,7 +74,7 @@ router.get("/", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).lean();
     if (!product) {
       return res.status(404).json({ error: "Product not found." });
     }
