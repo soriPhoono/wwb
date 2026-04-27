@@ -70,7 +70,7 @@ _: {
                   type=ref,event=branch
                   type=ref,event=pr
                   type=sha
-                  type=raw,value=0.1.1
+                  type=raw,value=0.1.2
                   type=raw,value=latest,enable=''${{ github.ref == 'refs/heads/main' }}
                 '';
               };
