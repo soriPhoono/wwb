@@ -8,6 +8,7 @@ import AccountPage from "../pages/AccountPage.vue";
 import AdminPage from "../pages/AdminPage.vue";
 import InventoryPage from "../pages/InventoryPage.vue";
 import ShopPage from "../pages/ShopPage.vue";
+import CheckoutPage from "../pages/CheckoutPage.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomePage },
@@ -41,6 +42,12 @@ const routes = [
     name: "inventory",
     component: InventoryPage,
     meta: { requiresAuth: true, requiresStaff: true },
+  },
+  {
+    path: "/checkout",
+    name: "checkout",
+    component: CheckoutPage,
+    meta: { requiresAuth: true },
   },
 ];
 

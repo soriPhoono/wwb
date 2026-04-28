@@ -30,6 +30,25 @@ export const createCheckoutSession = async (order, successUrl, cancelUrl) => {
   });
 };
 
+export const createPaymentIntent = async (
+  amount,
+  currency = "usd",
+  metadata = {},
+) => {
+  return await stripe.paymentIntents.create({
+    amount: Math.round(amount * 100),
+    currency,
+    metadata,
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+};
+
+export const retrievePaymentIntent = async (id) => {
+  return await stripe.paymentIntents.retrieve(id);
+};
+
 export const verifyWebhookSignature = (payload, sig, endpointSecret) => {
   return stripe.webhooks.constructEvent(payload, sig, endpointSecret);
 };

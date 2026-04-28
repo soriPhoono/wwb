@@ -3,23 +3,26 @@ import { requireAuth } from "../middleware/auth.js";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
+import {
+  createPaymentIntent,
+  retrievePaymentIntent,
+} from "../services/stripe.js";
+import crypto from "crypto";
 
 const router = Router();
 
 /**
- * POST /api/orders
- * Places a new order based on the user's current cart.
+ * POST /api/orders/payment-intent
+ * Creates a Stripe PaymentIntent for the user's current cart.
  */
-router.post("/", requireAuth, async (req, res) => {
+router.post("/payment-intent", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ error: "User not found." });
-
-    if (!user.cart || user.cart.length === 0) {
-      return res.status(400).json({ error: "Your cart is empty." });
+    if (!user || !user.cart || user.cart.length === 0) {
+      return res.status(400).json({ error: "Cart is empty." });
     }
 
-    // 1. Fetch full product details for items in cart
+    // Calculate total amount
     const productIds = user.cart.map((item) => item.productId);
     const products = await Product.find({ productId: { $in: productIds } });
 
@@ -28,7 +31,66 @@ router.post("/", requireAuth, async (req, res) => {
       productMap[p.productId] = p;
     });
 
-    // 2. Validate availability and calculate total
+    let totalAmount = 0;
+    for (const cartItem of user.cart) {
+      const product = productMap[cartItem.productId];
+      if (product && product.isActive) {
+        totalAmount += product.price * cartItem.quantity;
+      }
+    }
+
+    if (totalAmount <= 0) {
+      return res.status(400).json({ error: "Invalid order total." });
+    }
+
+    const paymentIntent = await createPaymentIntent(totalAmount, "usd", {
+      userId: user._id.toString(),
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Payment intent error:", err);
+    res.status(500).json({ error: "Failed to create payment intent." });
+  }
+});
+
+/**
+ * POST /api/orders
+ * Places a new order based on the user's current cart.
+ */
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    const { shippingDetails, paymentIntentId } = req.body;
+
+    if (!shippingDetails || !paymentIntentId) {
+      return res
+        .status(400)
+        .json({ error: "Missing required order information." });
+    }
+
+    // 1. Verify payment with Stripe
+    const paymentIntent = await retrievePaymentIntent(paymentIntentId);
+    if (paymentIntent.status !== "succeeded") {
+      return res.status(400).json({ error: "Payment not confirmed." });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    if (!user.cart || user.cart.length === 0) {
+      return res.status(400).json({ error: "Your cart is empty." });
+    }
+
+    // 2. Fetch full product details for items in cart
+    const productIds = user.cart.map((item) => item.productId);
+    const products = await Product.find({ productId: { $in: productIds } });
+
+    const productMap = {};
+    products.forEach((p) => {
+      productMap[p.productId] = p;
+    });
+
+    // 3. Validate availability and calculate total
     const orderItems = [];
     let totalAmount = 0;
 
@@ -60,17 +122,18 @@ router.post("/", requireAuth, async (req, res) => {
       });
     }
 
-    // 3. Create the order
+    // 4. Create the order
     const order = new Order({
       user: user._id,
       items: orderItems,
       totalAmount,
-      shippingDetails: req.body.shippingDetails || {}, // Frontend should provide this
-      status: "completed", // For now, assume payment is handled or it's a simple flow
+      shippingDetails,
+      status: "completed",
+      paymentMethod: "stripe",
+      accessKey: crypto.randomBytes(16).toString("hex"),
     });
 
-    // 4. Update stock and clear cart (Note: In production, use a transaction)
-    // Atomic stock decrement for each product
+    // 5. Update stock and clear cart (Note: In production, use a transaction)
     for (const item of orderItems) {
       await Product.findOneAndUpdate(
         { productId: item.productId, stock: { $gte: item.quantity } },
@@ -87,7 +150,7 @@ router.post("/", requireAuth, async (req, res) => {
     res.status(201).json({
       message: "Order placed successfully.",
       orderId: order._id,
-      totalAmount: order.totalAmount,
+      accessKey: order.accessKey,
     });
   } catch (err) {
     console.error("Order placement error:", err);

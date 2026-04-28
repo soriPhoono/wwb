@@ -1,6 +1,11 @@
-<script setup>
+<script>
 import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { useAuth } from "../composables/useAuth";
+
+const route = useRoute();
+const orderSuccess = ref(false);
+const orderId = ref("");
 
 const {
   user,
@@ -33,6 +38,11 @@ onMounted(() => {
   if (user.value) {
     profileEmail.value = user.value.email;
     profilePhone.value = user.value.phone || "";
+  }
+
+  if (route.query.orderSuccess === "true") {
+    orderSuccess.value = true;
+    orderId.value = route.query.orderId;
   }
 });
 
@@ -108,6 +118,56 @@ function formatDate(date) {
           Account Settings
         </h1>
         <p class="text-slate-500 font-medium m-0">Manage your profile</p>
+      </div>
+
+      <!-- Order Success Notification -->
+      <div
+        v-if="orderSuccess"
+        class="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500"
+      >
+        <div
+          class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-blue-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white m-0">
+            Order Placed Successfully!
+          </h3>
+          <p class="text-slate-400 text-sm m-0">
+            Your order #{{ orderId }} has been received and is being processed.
+          </p>
+        </div>
+        <button
+          @click="orderSuccess = false"
+          class="ml-auto text-slate-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
       </div>
 
       <!-- Quick Summary Card -->

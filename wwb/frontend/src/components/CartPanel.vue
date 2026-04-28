@@ -91,11 +91,13 @@ const {
         Total:
         <span class="text-blue-400">${{ (cartTotal || 0).toFixed(2) }}</span>
       </h3>
-      <button
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-lg font-bold shadow-md cursor-pointer transition-colors border-none"
+      <router-link
+        to="/checkout"
+        @click="toggleCart"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-lg font-bold shadow-md cursor-pointer transition-colors border-none text-center block no-underline"
       >
-        Demo Checkout
-      </button>
+        Proceed to Checkout
+      </router-link>
     </div>
   </aside>
 </template>
