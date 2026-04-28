@@ -175,6 +175,20 @@ router.delete("/:id", requireAuth, requireContentCreator, async (req, res) => {
       return res.status(404).json({ error: "Product not found." });
     }
 
+    // ── Cascade Removal from Carts ────────────────────────────────────
+    // If the product has a productId, remove it from all user carts
+    if (product.productId !== undefined && product.productId !== null) {
+      try {
+        await User.updateMany(
+          { "cart.productId": product.productId },
+          { $pull: { cart: { productId: product.productId } } },
+        );
+      } catch (err) {
+        console.error("Error removing product from user carts:", err);
+        // We don't fail the request here, but we log the error
+      }
+    }
+
     res.json({ message: "Product deleted successfully." });
   } catch (err) {
     console.error("Error deleting product:", err);
