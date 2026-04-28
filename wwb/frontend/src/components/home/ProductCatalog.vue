@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { useCart, products } from "../composables/useCart";
+import { useCart, products } from "../../composables/useCart";
 const { addToCart, canUseCart, getAvailableStock } = useCart();
 
 const featuredProducts = computed(() => products.value.slice(0, 4));

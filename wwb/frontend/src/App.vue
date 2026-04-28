@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted } from "vue";
-import Header from "./components/Header.vue";
-import CartPanel from "./components/CartPanel.vue";
-import Footer from "./components/Footer.vue";
+import Header from "./components/layout/Header.vue";
+import CartPanel from "./components/layout/CartPanel.vue";
+import Footer from "./components/layout/Footer.vue";
 import { useAuth } from "./composables/useAuth";
 import { useCart } from "./composables/useCart";
 

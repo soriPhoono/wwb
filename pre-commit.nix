@@ -10,5 +10,13 @@
       entry = "${pkgs.gitleaks}/bin/gitleaks protect --verbose --redact --staged";
       pass_filenames = false;
     };
+
+    vitest-frontend = {
+      enable = true;
+      name = "vitest-frontend";
+      entry = "cd wwb/frontend && npm run test";
+      pass_filenames = false;
+      files = "\\\\.(js|vue)$";
+    };
   };
 }

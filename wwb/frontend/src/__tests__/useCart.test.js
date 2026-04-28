@@ -122,7 +122,7 @@ describe("useCart Composable", () => {
     });
 
     it("should return correct stock for a logged-in user", () => {
-      // Note: Testing user logic would require mocking useAuthState.js
+      // Note: Testing user logic would require mocking useAuth.js
       // which is already done via the global import side-effect in useCart.
       // But we can verify the logic branch is covered.
     });

@@ -1,6 +1,9 @@
 import { ref, computed } from "vue";
-import { user, authLoading } from "./useAuthState.js";
 import { useCart } from "./useCart.js";
+
+// Shared singleton auth state
+export const user = ref(null);
+export const authLoading = ref(true);
 
 // MFA challenge state
 const mfaPending = ref(false);

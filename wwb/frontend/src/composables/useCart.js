@@ -1,5 +1,5 @@
 import { ref, computed, watch } from "vue";
-import { user } from "./useAuthState.js";
+import { user } from "./useAuth.js";
 
 // Reactive products array fetched from backend
 export const products = ref([]);

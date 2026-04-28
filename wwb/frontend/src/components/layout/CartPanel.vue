@@ -1,5 +1,5 @@
 <script setup>
-import { useCart } from "../composables/useCart";
+import { useCart } from "../../composables/useCart";
 
 const {
   cart,

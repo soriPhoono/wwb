@@ -1,6 +1,6 @@
 <script setup>
-import { useCart } from "../composables/useCart";
-import { useAuth } from "../composables/useAuth";
+import { useCart } from "../../composables/useCart";
+import { useAuth } from "../../composables/useAuth";
 import UserMenu from "./UserMenu.vue";
 
 const { cartCount, toggleCart, canUseCart } = useCart();
