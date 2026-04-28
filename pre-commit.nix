@@ -18,5 +18,13 @@
       pass_filenames = false;
       files = "\\\\.(js|vue)$";
     };
+
+    vitest-backend = {
+      enable = true;
+      name = "vitest-backend";
+      entry = "cd wwb/backend && npm run test";
+      pass_filenames = false;
+      files = "^wwb/backend/.*\\\\.js$";
+    };
   };
 }
