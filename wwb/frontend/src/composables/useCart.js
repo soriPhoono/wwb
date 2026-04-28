@@ -126,6 +126,9 @@ export const fetchProducts = async () => {
     const res = await fetch("/api/products");
     if (res.ok) {
       products.value = await res.json();
+      // After products are loaded, validate the cart (especially important for guests)
+      const { validateCart } = useCart();
+      validateCart();
     }
   } catch (err) {
     console.error("Failed to fetch products:", err);
@@ -299,5 +302,21 @@ export function useCart() {
     clearCart,
     getAvailableStock,
     fetchProducts,
+    validateCart: () => {
+      if (products.value.length === 0) return;
+
+      // Keep only items that exist in the products list
+      const validCart = cart.value.filter((item) => {
+        return products.value.some(
+          (p) => (p.productId || p._id || p.id) === (item.productId || item.id),
+        );
+      });
+
+      if (validCart.length !== cart.value.length) {
+        console.log("Stripping non-existent products from guest cart.");
+        cart.value = validCart;
+        // The watcher on 'cart' will automatically update the cookie.
+      }
+    },
   };
 }
