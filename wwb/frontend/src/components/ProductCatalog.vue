@@ -81,7 +81,7 @@ const featuredProducts = computed(() => products.value.slice(0, 4));
             <div class="mt-auto mb-5">
               <div class="flex items-center justify-between mb-1">
                 <p class="text-3xl font-extrabold text-white m-0">
-                  ${{ product.price.toFixed(2) }}
+                  ${{ (product.price || 0).toFixed(2) }}
                 </p>
                 <span
                   class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border"

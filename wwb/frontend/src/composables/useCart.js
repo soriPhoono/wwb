@@ -97,19 +97,17 @@ watch(
  * Hydrates a list of { productId, quantity } into full cart items
  */
 function hydrateCart(simpleCart) {
-  return simpleCart
-    .map((item) => {
-      const product = products.value.find((p) => {
-        const pId = p.productId || p._id || p.id;
-        return String(pId) === item.productId;
-      });
-      if (!product) return null;
-      return {
-        ...product,
-        quantity: item.quantity,
-      };
-    })
-    .filter(Boolean);
+  return simpleCart.map((item) => {
+    const product = products.value.find((p) => {
+      const pId = p.productId || p._id || p.id;
+      return String(pId) === String(item.productId);
+    });
+    if (!product) return item; // Keep minimal item so it can be removed
+    return {
+      ...product,
+      quantity: item.quantity,
+    };
+  });
 }
 
 /**
@@ -194,12 +192,13 @@ export function useCart() {
 
   const getAvailableStock = (productId) => {
     const product = products.value.find(
-      (p) => (p.productId || p._id || p.id) === productId,
+      (p) => String(p.productId || p._id || p.id) === String(productId),
     );
     if (!product) return 0;
 
     const myItem = cart.value.find(
-      (item) => (item.productId || item._id || item.id) === productId,
+      (item) =>
+        String(item.productId || item._id || item.id) === String(productId),
     );
     const myQty = myItem ? myItem.quantity : 0;
 
@@ -209,13 +208,15 @@ export function useCart() {
 
   const addToCart = async (productId) => {
     const product = products.value.find(
-      (item) => (item.productId || item._id || item.id) === productId,
+      (item) =>
+        String(item.productId || item._id || item.id) === String(productId),
     );
     if (!product) return;
 
     const available = getAvailableStock(productId);
     const existingItem = cart.value.find(
-      (item) => (item.productId || item._id || item.id) === productId,
+      (item) =>
+        String(item.productId || item._id || item.id) === String(productId),
     );
 
     if (existingItem) {
@@ -239,14 +240,14 @@ export function useCart() {
   const removeFromCart = (productId) => {
     cart.value = cart.value.filter((item) => {
       const itemId = item.productId || item._id || item.id;
-      return String(itemId) !== productId;
+      return String(itemId) !== String(productId);
     });
   };
 
   const updateQuantity = (productId, change) => {
     const item = cart.value.find((product) => {
       const itemId = product.productId || product._id || product.id;
-      return String(itemId) === productId;
+      return String(itemId) === String(productId);
     });
     if (!item) return;
 
@@ -271,7 +272,7 @@ export function useCart() {
 
   const cartTotal = computed(() => {
     return cart.value.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + (item.price || 0) * item.quantity,
       0,
     );
   });

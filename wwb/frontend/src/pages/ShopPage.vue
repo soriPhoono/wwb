@@ -189,7 +189,7 @@ const closeModal = () => {
                   {{ product.name }}
                 </h3>
                 <p class="text-xl font-black text-blue-400 m-0">
-                  ${{ product.price.toFixed(2) }}
+                  ${{ (product.price ?? 0).toFixed(2) }}
                 </p>
               </div>
               <p class="text-slate-400 text-sm line-clamp-2 mb-4">
@@ -297,7 +297,7 @@ const closeModal = () => {
               {{ selectedProduct.name }}
             </h2>
             <p class="text-3xl font-extrabold text-blue-400 mb-8">
-              ${{ selectedProduct.price.toFixed(2) }}
+              ${{ (selectedProduct.price || 0).toFixed(2) }}
             </p>
 
             <div class="prose prose-slate mb-10">

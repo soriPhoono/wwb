@@ -42,9 +42,13 @@ const {
         :key="item.productId || item._id || item.id"
       >
         <div>
-          <h4 class="m-0 mb-1.5 font-bold text-white">{{ item.name }}</h4>
+          <h4 class="m-0 mb-1.5 font-bold text-white">
+            {{
+              item.name || "Product " + (item.productId || item._id || item.id)
+            }}
+          </h4>
           <p class="m-0 text-blue-400 font-semibold">
-            ${{ item.price.toFixed(2) }} each
+            ${{ (item.price || 0).toFixed(2) }} each
           </p>
           <div class="flex items-center gap-2 mt-3 flex-wrap">
             <button
@@ -84,7 +88,8 @@ const {
 
     <div class="p-5 border-t border-white/10 mt-auto bg-slate-950">
       <h3 class="m-0 mb-4 flex justify-between text-lg font-bold text-white">
-        Total: <span class="text-blue-400">${{ cartTotal.toFixed(2) }}</span>
+        Total:
+        <span class="text-blue-400">${{ (cartTotal || 0).toFixed(2) }}</span>
       </h3>
       <button
         class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-lg font-bold shadow-md cursor-pointer transition-colors border-none"
