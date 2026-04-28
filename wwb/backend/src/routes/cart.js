@@ -41,10 +41,10 @@ router.post("/", requireAuth, async (req, res) => {
   // Validate cart items
   const validCart = cart
     .map((item) => ({
-      productId: Number(item.productId),
+      productId: String(item.productId),
       quantity: Number(item.quantity),
     }))
-    .filter((item) => !isNaN(item.productId) && !isNaN(item.quantity));
+    .filter((item) => item.productId && !isNaN(item.quantity));
 
   try {
     const user = await User.findById(req.userId);
@@ -74,16 +74,20 @@ router.post("/", requireAuth, async (req, res) => {
 
     const othersMap = {};
     othersClaimed.forEach((c) => {
-      othersMap[c._id] = c.total;
+      if (c._id) othersMap[c._id] = c.total;
     });
 
     // Get all products to check stock
     const products = await Product.find({
-      productId: { $in: validCart.map((i) => i.productId) },
+      $or: [
+        { productId: { $in: validCart.map((i) => i.productId) } },
+        { _id: { $in: validCart.map((i) => i.productId) } },
+      ],
     }).lean();
     const productMap = {};
     products.forEach((p) => {
-      productMap[p.productId] = p;
+      if (p.productId) productMap[p.productId] = p;
+      productMap[p._id.toString()] = p;
     });
 
     // Check each item

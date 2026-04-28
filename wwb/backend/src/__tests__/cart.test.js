@@ -7,7 +7,12 @@ import jwt from "jsonwebtoken";
 
 // Mock the models
 vi.mock("../models/User.js");
-vi.mock("../models/Product.js");
+vi.mock("../models/Product.js", () => ({
+  default: {
+    find: vi.fn().mockReturnThis(),
+    lean: vi.fn(),
+  },
+}));
 vi.mock("../middleware/auth.js", async () => {
   const actual = await vi.importActual("../middleware/auth.js");
   return {
@@ -32,7 +37,7 @@ describe("Cart API Integration", () => {
       User.findById.mockResolvedValue({
         _id: "test-user-id",
         roles: [],
-        cart: [{ productId: 1, quantity: 2 }],
+        cart: [{ productId: "1", quantity: 2 }],
       });
 
       const res = await request(app)
@@ -40,7 +45,7 @@ describe("Cart API Integration", () => {
         .set("Cookie", ["token=fake-token"]);
 
       expect(res.status).toBe(200);
-      expect(res.body.cart).toEqual([{ productId: 1, quantity: 2 }]);
+      expect(res.body.cart).toEqual([{ productId: "1", quantity: 2 }]);
     });
 
     it("should return 403 for staff members", async () => {
@@ -56,6 +61,55 @@ describe("Cart API Integration", () => {
 
       expect(res.status).toBe(403);
       expect(res.body.error).toBe("Staff members cannot use the cart system.");
+    });
+  });
+
+  describe("POST /api/cart", () => {
+    it("should sync cart with string IDs", async () => {
+      const mockUser = {
+        _id: "test-user-id",
+        roles: [],
+        save: vi.fn().mockResolvedValue(true),
+      };
+      User.findById.mockResolvedValue(mockUser);
+      Product.lean.mockResolvedValue([
+        { _id: "abc", productId: "1", stock: 10, name: "Test" },
+      ]);
+      User.aggregate.mockResolvedValue([]); // No other users have claimed
+
+      const res = await request(app)
+        .post("/api/cart")
+        .send({
+          cart: [{ productId: "abc", quantity: 1 }],
+        })
+        .set("Cookie", ["token=fake-token"]);
+
+      expect(res.status).toBe(200);
+      expect(mockUser.cart).toEqual([{ productId: "abc", quantity: 1 }]);
+      expect(mockUser.save).toHaveBeenCalled();
+    });
+
+    it("should handle numeric productId even if passed as string", async () => {
+      const mockUser = {
+        _id: "test-user-id",
+        roles: [],
+        save: vi.fn().mockResolvedValue(true),
+      };
+      User.findById.mockResolvedValue(mockUser);
+      Product.lean.mockResolvedValue([
+        { _id: "some-id", productId: 2, stock: 10, name: "Test" },
+      ]);
+      User.aggregate.mockResolvedValue([]);
+
+      const res = await request(app)
+        .post("/api/cart")
+        .send({
+          cart: [{ productId: "2", quantity: 1 }],
+        })
+        .set("Cookie", ["token=fake-token"]);
+
+      expect(res.status).toBe(200);
+      expect(mockUser.cart).toEqual([{ productId: "2", quantity: 1 }]);
     });
   });
 });

@@ -40,7 +40,7 @@ const productSchema = new Schema(
     },
     // Optional: numeric ID if the frontend/cart system expects it
     productId: {
-      type: Number,
+      type: String,
       unique: true,
       sparse: true,
     },

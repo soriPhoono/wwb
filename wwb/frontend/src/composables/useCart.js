@@ -99,9 +99,10 @@ watch(
 function hydrateCart(simpleCart) {
   return simpleCart
     .map((item) => {
-      const product = products.value.find(
-        (p) => (p.productId || p._id || p.id) === item.productId,
-      );
+      const product = products.value.find((p) => {
+        const pId = p.productId || p._id || p.id;
+        return String(pId) === item.productId;
+      });
       if (!product) return null;
       return {
         ...product,
@@ -116,7 +117,7 @@ function hydrateCart(simpleCart) {
  */
 function simplifyCart(fullCart) {
   return fullCart.map((item) => ({
-    productId: item.productId || item.id,
+    productId: String(item.productId || item._id || item.id),
     quantity: item.quantity,
   }));
 }
@@ -236,16 +237,17 @@ export function useCart() {
   };
 
   const removeFromCart = (productId) => {
-    cart.value = cart.value.filter(
-      (item) => (item.productId || item._id || item.id) !== productId,
-    );
+    cart.value = cart.value.filter((item) => {
+      const itemId = item.productId || item._id || item.id;
+      return String(itemId) !== productId;
+    });
   };
 
   const updateQuantity = (productId, change) => {
-    const item = cart.value.find(
-      (product) =>
-        (product.productId || product._id || product.id) === productId,
-    );
+    const item = cart.value.find((product) => {
+      const itemId = product.productId || product._id || product.id;
+      return String(itemId) === productId;
+    });
     if (!item) return;
 
     if (change > 0) {
@@ -307,9 +309,11 @@ export function useCart() {
 
       // Keep only items that exist in the products list
       const validCart = cart.value.filter((item) => {
-        return products.value.some(
-          (p) => (p.productId || p._id || p.id) === (item.productId || item.id),
-        );
+        return products.value.some((p) => {
+          const pId = p.productId || p._id || p.id;
+          const itemId = item.productId || item._id || item.id;
+          return String(pId) === String(itemId);
+        });
       });
 
       if (validCart.length !== cart.value.length) {
