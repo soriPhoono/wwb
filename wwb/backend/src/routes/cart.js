@@ -78,12 +78,18 @@ router.post("/", requireAuth, async (req, res) => {
     });
 
     // Get all products to check stock
+    const productIds = validCart.map((i) => i.productId);
+    const validObjectIds = productIds.filter((id) =>
+      /^[0-9a-fA-F]{24}$/.test(id),
+    );
+
     const products = await Product.find({
       $or: [
-        { productId: { $in: validCart.map((i) => i.productId) } },
-        { _id: { $in: validCart.map((i) => i.productId) } },
+        { productId: { $in: productIds } },
+        { _id: { $in: validObjectIds } },
       ],
     }).lean();
+
     const productMap = {};
     products.forEach((p) => {
       if (p.productId) productMap[p.productId] = p;
@@ -111,7 +117,9 @@ router.post("/", requireAuth, async (req, res) => {
     res.json({ message: "Cart synced successfully.", cart: user.cart });
   } catch (err) {
     console.error("Sync cart error:", err);
-    res.status(500).json({ error: "Server error." });
+    res
+      .status(500)
+      .json({ error: "Server error during cart synchronization." });
   }
 });
 

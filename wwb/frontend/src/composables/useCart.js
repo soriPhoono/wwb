@@ -30,6 +30,18 @@ function getCookie(name) {
 const cart = ref([]);
 const isCartOpen = ref(false);
 
+// Helper to compare product identifiers robustly
+const compareIds = (idA, idB) => {
+  if (!idA || !idB) return false;
+  const getStr = (obj) => {
+    if (typeof obj === "string" || typeof obj === "number") return String(obj);
+    return String(obj.productId || obj._id || obj.id || "");
+  };
+  const strA = getStr(idA);
+  const strB = getStr(idB);
+  return strA !== "" && strA === strB;
+};
+
 // Initialize cart from cookie once
 const cartData = getCookie("shoppingCart");
 if (cartData) {
@@ -102,11 +114,7 @@ watch(
 function hydrateCart(simpleCart, stripMissing = false) {
   return simpleCart
     .map((item) => {
-      const product = products.value.find((p) => {
-        const pId = p.productId || p._id || p.id;
-        return String(pId) === String(item.productId);
-      });
-
+      const product = products.value.find((p) => compareIds(p, item));
       if (product) {
         return {
           ...product,
@@ -151,7 +159,12 @@ export const fetchProducts = async () => {
 
 export function useCart() {
   // Fetch products on initial composable usage if empty
-  if (products.value.length === 0) {
+  // Auto-fetch products if list is empty
+  if (
+    products.value.length === 0 &&
+    typeof process !== "undefined" &&
+    process.env?.NODE_ENV !== "test"
+  ) {
     fetchProducts();
   }
 
@@ -193,6 +206,9 @@ export function useCart() {
       }
     } catch (err) {
       console.error("Failed to sync cart:", err);
+      alert(
+        "A connection error occurred. Your changes may not have been saved.",
+      );
     }
   };
 
@@ -206,33 +222,27 @@ export function useCart() {
   };
 
   const getAvailableStock = (productId) => {
-    const product = products.value.find(
-      (p) => String(p.productId || p._id || p.id) === String(productId),
-    );
+    const product = products.value.find((p) => compareIds(p, productId));
     if (!product) return 0;
 
-    const myItem = cart.value.find(
-      (item) =>
-        String(item.productId || item._id || item.id) === String(productId),
-    );
+    const myItem = cart.value.find((item) => compareIds(item, productId));
     const myQty = myItem ? myItem.quantity : 0;
 
-    const othersClaimed = Math.max(0, (product.claimedCount || 0) - myQty);
-    return Math.max(0, (product.stock || 0) - othersClaimed);
+    // If logged in, myQty is expected to be part of product.claimedCount in the DB.
+    // For guests, their items are not in the database yet.
+    const claimedByOthers = user.value
+      ? Math.max(0, (product.claimedCount || 0) - myQty)
+      : product.claimedCount || 0;
+
+    return Math.max(0, (product.stock || 0) - claimedByOthers);
   };
 
   const addToCart = async (productId) => {
-    const product = products.value.find(
-      (item) =>
-        String(item.productId || item._id || item.id) === String(productId),
-    );
+    const product = products.value.find((p) => compareIds(p, productId));
     if (!product) return;
 
     const available = getAvailableStock(productId);
-    const existingItem = cart.value.find(
-      (item) =>
-        String(item.productId || item._id || item.id) === String(productId),
-    );
+    const existingItem = cart.value.find((item) => compareIds(item, productId));
 
     if (existingItem) {
       if (existingItem.quantity >= available) {
@@ -260,10 +270,7 @@ export function useCart() {
   };
 
   const updateQuantity = (productId, change) => {
-    const item = cart.value.find((product) => {
-      const itemId = product.productId || product._id || product.id;
-      return String(itemId) === String(productId);
-    });
+    const item = cart.value.find((product) => compareIds(product, productId));
     if (!item) return;
 
     if (change > 0) {
@@ -320,5 +327,7 @@ export function useCart() {
     clearCart,
     getAvailableStock,
     fetchProducts,
+    hydrateCart,
+    simplifyCart,
   };
 }
