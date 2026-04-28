@@ -44,7 +44,6 @@ _: {
                   type=ref,event=branch
                   type=ref,event=pr
                   type=sha
-                  type=raw,value=0.1.3
                   type=raw,value=latest,enable=''${{ github.ref == 'refs/heads/main' }}
                 '';
               };
@@ -70,7 +69,6 @@ _: {
                   type=ref,event=branch
                   type=ref,event=pr
                   type=sha
-                  type=raw,value=0.1.8
                   type=raw,value=latest,enable=''${{ github.ref == 'refs/heads/main' }}
                 '';
               };

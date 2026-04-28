@@ -1,9 +1,20 @@
 services:
   # ──────────────────────────────────────────────
+  # Shepherd — reverse proxy and service monitoring
+  # ──────────────────────────────────────────────
+  shepherd:
+    image: containrrr/shepherd
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+  # ──────────────────────────────────────────────
   # MongoDB — primary data store
   # ──────────────────────────────────────────────
   mongo:
-    image: mongo:8.2.7
+    image: mongo:latest
     configs:
       - source: mongo-init
         target: /docker-entrypoint-initdb.d/init.js
@@ -33,7 +44,7 @@ services:
   # Mongo Express — web-based MongoDB admin UI
   # ──────────────────────────────────────────────
   mongo-express:
-    image: mongo-express:1.0.2
+    image: mongo-express:latest
     entrypoint: ["/bin/sh", "/configs/entrypoint.sh"]
     configs:
       - source: mongo-express-entrypoint
@@ -116,7 +127,7 @@ services:
   # Forwards cloudflare edge → frontend:80
   # ──────────────────────────────────────────────
   cloudflared:
-    image: cloudflare/cloudflared:2026.3.0
+    image: cloudflare/cloudflared:latest
     # Read token from Swarm secret file and pass to cloudflared
     command: tunnel --no-autoupdate run
     depends_on:
