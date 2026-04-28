@@ -48,7 +48,8 @@ let isHydrating = false;
 watch(
   cart,
   (newCart) => {
-    setCookie("shoppingCart", JSON.stringify(newCart), 7);
+    // Save simplified version to cookie to keep it under 4KB limit
+    setCookie("shoppingCart", JSON.stringify(simplifyCart(newCart)), 7);
 
     // If logged in and NOT currently hydrating from backend, sync to backend
     if (user.value && !isHydrating) {
@@ -95,19 +96,29 @@ watch(
 
 /**
  * Hydrates a list of { productId, quantity } into full cart items
+ * @param {Array} simpleCart - The list of minimal item objects
+ * @param {Boolean} stripMissing - If true, items not found in 'products' will be removed
  */
-function hydrateCart(simpleCart) {
-  return simpleCart.map((item) => {
-    const product = products.value.find((p) => {
-      const pId = p.productId || p._id || p.id;
-      return String(pId) === String(item.productId);
-    });
-    if (!product) return item; // Keep minimal item so it can be removed
-    return {
-      ...product,
-      quantity: item.quantity,
-    };
-  });
+function hydrateCart(simpleCart, stripMissing = false) {
+  return simpleCart
+    .map((item) => {
+      const product = products.value.find((p) => {
+        const pId = p.productId || p._id || p.id;
+        return String(pId) === String(item.productId);
+      });
+
+      if (product) {
+        return {
+          ...product,
+          quantity: item.quantity,
+        };
+      }
+
+      // If backend is unreachable or product missing, handle based on stripMissing
+      // Guests visiting the site should have their carts purged of truly non-existent items
+      return stripMissing ? null : item;
+    })
+    .filter(Boolean);
 }
 
 /**
@@ -125,9 +136,13 @@ export const fetchProducts = async () => {
     const res = await fetch("/api/products");
     if (res.ok) {
       products.value = await res.json();
-      // After products are loaded, validate the cart (especially important for guests)
-      const { validateCart } = useCart();
-      validateCart();
+      // After products are loaded, perform a deep hydration/validation of the local cart.
+      // This will automatically strip any items that are no longer in the database (isActive: false or deleted).
+      isHydrating = true;
+      cart.value = hydrateCart(simplifyCart(cart.value), true);
+      setTimeout(() => {
+        isHydrating = false;
+      }, 0);
     }
   } catch (err) {
     console.error("Failed to fetch products:", err);
@@ -305,23 +320,5 @@ export function useCart() {
     clearCart,
     getAvailableStock,
     fetchProducts,
-    validateCart: () => {
-      if (products.value.length === 0) return;
-
-      // Keep only items that exist in the products list
-      const validCart = cart.value.filter((item) => {
-        return products.value.some((p) => {
-          const pId = p.productId || p._id || p.id;
-          const itemId = item.productId || item._id || item.id;
-          return String(pId) === String(itemId);
-        });
-      });
-
-      if (validCart.length !== cart.value.length) {
-        console.log("Stripping non-existent products from guest cart.");
-        cart.value = validCart;
-        // The watcher on 'cart' will automatically update the cookie.
-      }
-    },
   };
 }
