@@ -18,7 +18,7 @@ services:
     environment:
       SOPS_AGE_KEY_FILE: /run/secrets/cluster-key
       DOMAIN_NAME: cryptic-coders.net
-      BYPASS_PAYMENT_VERIFICATION: true
+      BYPASS_PAYMENT_VERIFICATION: "true"
     deploy:
       restart_policy:
         condition: on-failure
