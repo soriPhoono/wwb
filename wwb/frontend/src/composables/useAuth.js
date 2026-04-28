@@ -108,6 +108,8 @@ export function useAuth() {
 
   // Called once on app mount to rehydrate session from HttpOnly cookie
   async function fetchMe() {
+    if (user.value) return; // Already have user
+
     try {
       authLoading.value = true;
       const res = await fetch("/api/auth/me", { credentials: "include" });

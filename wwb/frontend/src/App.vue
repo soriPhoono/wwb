@@ -6,13 +6,9 @@ import Footer from "./components/layout/Footer.vue";
 import { useAuth } from "./composables/useAuth";
 import { useCart } from "./composables/useCart";
 
-const { fetchMe } = useAuth();
+// Auth initialization is now handled by the router guard to prevent deadlocks
+// but we keep useAuth import if needed for other things.
 const { isCartOpen, toggleCart } = useCart();
-
-// Rehydrate session from HttpOnly cookie on every page load
-onMounted(() => {
-  fetchMe();
-});
 </script>
 
 <template>

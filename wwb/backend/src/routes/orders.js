@@ -1,24 +1,31 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, optionalAuth } from "../middleware/auth.js";
 import {
   createOrderPaymentIntent,
   placeOrder,
   getOrderHistory,
+  getGuestOrder,
 } from "../controllers/orderController.js";
 
 const router = Router();
 
 /**
  * POST /api/orders/payment-intent
- * Creates a Stripe PaymentIntent for the user's current cart.
+ * Creates a Stripe PaymentIntent. Supports guest checkout.
  */
-router.post("/payment-intent", requireAuth, createOrderPaymentIntent);
+router.post("/payment-intent", optionalAuth, createOrderPaymentIntent);
 
 /**
  * POST /api/orders
- * Places a new order based on the user's current cart.
+ * Places a new order. Supports guest checkout.
  */
-router.post("/", requireAuth, placeOrder);
+router.post("/", optionalAuth, placeOrder);
+
+/**
+ * GET /api/orders/guest/:id
+ * Retrieves order details for a guest using an access key.
+ */
+router.get("/guest/:id", getGuestOrder);
 
 /**
  * GET /api/orders

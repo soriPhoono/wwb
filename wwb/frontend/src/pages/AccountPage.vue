@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useAuth } from "../composables/useAuth";

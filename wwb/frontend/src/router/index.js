@@ -47,7 +47,11 @@ const routes = [
     path: "/checkout",
     name: "checkout",
     component: CheckoutPage,
-    meta: { requiresAuth: true },
+  },
+  {
+    path: "/order/:id",
+    name: "order-details",
+    component: () => import("../pages/OrderDetailsPage.vue"),
   },
 ];
 
@@ -66,18 +70,11 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach(async (to, from) => {
-  const { isLoggedIn, authLoading } = useAuth();
+  const { isLoggedIn, authLoading, fetchMe } = useAuth();
 
-  // Wait for auth to finish loading before guarding
+  // If we're still loading the initial auth state, wait for it
   if (authLoading.value) {
-    await new Promise((resolve) => {
-      const unwatch = setInterval(() => {
-        if (!authLoading.value) {
-          clearInterval(unwatch);
-          resolve();
-        }
-      }, 50);
-    });
+    await fetchMe();
   }
 
   // Redirect authenticated users away from guest-only pages

@@ -27,3 +27,18 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
+
+export function optionalAuth(req, res, next) {
+  const token = req.cookies?.token;
+  if (!token) {
+    return next();
+  }
+  try {
+    const payload = jwt.verify(token, getJwtSecret());
+    req.userId = payload.userId;
+    req.userRoles = payload.roles || [];
+    next();
+  } catch (err) {
+    next();
+  }
+}

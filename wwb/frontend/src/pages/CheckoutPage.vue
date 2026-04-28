@@ -83,7 +83,10 @@ const handleCheckout = async () => {
     const res = await fetch("/api/orders/payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ shippingDetails: shippingDetails.value }),
+      body: JSON.stringify({
+        shippingDetails: shippingDetails.value,
+        items: cart.value,
+      }),
     });
 
     if (!res.ok) {
@@ -123,6 +126,7 @@ const handleCheckout = async () => {
         body: JSON.stringify({
           shippingDetails: shippingDetails.value,
           paymentIntentId: result.paymentIntent.id,
+          items: cart.value,
         }),
       });
 
@@ -139,8 +143,9 @@ const handleCheckout = async () => {
       // 4. Success! Clear cart and redirect
       clearCart();
       router.push({
-        name: "account",
-        query: { orderSuccess: "true", orderId: orderData.orderId },
+        name: "order-details",
+        params: { id: orderData.orderId },
+        query: { accessKey: orderData.accessKey, orderSuccess: "true" },
       });
     }
   } catch (err) {
@@ -169,6 +174,7 @@ const handleTestCheckout = async () => {
       body: JSON.stringify({
         shippingDetails: shippingDetails.value,
         paymentIntentId: "pi_test_bypass", // This is the mock ID
+        items: cart.value,
       }),
     });
 
@@ -180,8 +186,9 @@ const handleTestCheckout = async () => {
     const orderData = await orderRes.json();
     clearCart();
     router.push({
-      name: "account",
-      query: { orderSuccess: "true", orderId: orderData.orderId },
+      name: "order-details",
+      params: { id: orderData.orderId },
+      query: { accessKey: orderData.accessKey, orderSuccess: "true" },
     });
   } catch (err) {
     console.error("Test Checkout error:", err);

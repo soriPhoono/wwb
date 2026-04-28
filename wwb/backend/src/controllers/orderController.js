@@ -8,13 +8,22 @@ import {
 import crypto from "crypto";
 
 export const createOrderPaymentIntent = async (req, res) => {
-  const user = await User.findById(req.userId);
-  if (!user || !user.cart || user.cart.length === 0) {
-    return res.status(400).json({ error: "Cart is empty." });
+  let items = [];
+  if (req.userId) {
+    const user = await User.findById(req.userId);
+    if (!user || !user.cart || user.cart.length === 0) {
+      return res.status(400).json({ error: "Cart is empty." });
+    }
+    items = user.cart;
+  } else {
+    items = req.body.items;
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: "Cart is empty." });
+    }
   }
 
   // Calculate total amount
-  const productIds = user.cart.map((item) => item.productId);
+  const productIds = items.map((item) => item.productId);
   const products = await Product.find({ productId: { $in: productIds } });
 
   const productMap = {};
@@ -23,10 +32,10 @@ export const createOrderPaymentIntent = async (req, res) => {
   });
 
   let totalAmount = 0;
-  for (const cartItem of user.cart) {
-    const product = productMap[cartItem.productId];
+  for (const item of items) {
+    const product = productMap[item.productId];
     if (product && product.isActive) {
-      totalAmount += product.price * cartItem.quantity;
+      totalAmount += product.price * item.quantity;
     }
   }
 
@@ -35,14 +44,14 @@ export const createOrderPaymentIntent = async (req, res) => {
   }
 
   const paymentIntent = await createPaymentIntent(totalAmount, "usd", {
-    userId: user._id.toString(),
+    userId: req.userId || "guest",
   });
 
   res.json({ clientSecret: paymentIntent.client_secret });
 };
 
 export const placeOrder = async (req, res) => {
-  const { shippingDetails, paymentIntentId } = req.body;
+  const { shippingDetails, paymentIntentId, items } = req.body;
 
   if (!shippingDetails || !paymentIntentId) {
     return res
@@ -63,15 +72,23 @@ export const placeOrder = async (req, res) => {
     }
   }
 
-  const user = await User.findById(req.userId);
-  if (!user) return res.status(404).json({ error: "User not found." });
+  let itemsToProcess = [];
+  let user = null;
 
-  if (!user.cart || user.cart.length === 0) {
+  if (req.userId) {
+    user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found." });
+    itemsToProcess = user.cart;
+  } else {
+    itemsToProcess = items;
+  }
+
+  if (!itemsToProcess || itemsToProcess.length === 0) {
     return res.status(400).json({ error: "Your cart is empty." });
   }
 
-  // 2. Fetch full product details for items in cart
-  const productIds = user.cart.map((item) => item.productId);
+  // 2. Fetch full product details for items
+  const productIds = itemsToProcess.map((item) => item.productId);
   const products = await Product.find({ productId: { $in: productIds } });
 
   const productMap = {};
@@ -83,37 +100,37 @@ export const placeOrder = async (req, res) => {
   const orderItems = [];
   let totalAmount = 0;
 
-  for (const cartItem of user.cart) {
-    const product = productMap[cartItem.productId];
+  for (const item of itemsToProcess) {
+    const product = productMap[item.productId];
 
     if (!product || !product.isActive) {
       return res.status(400).json({
-        error: `Product with ID ${cartItem.productId} is no longer available.`,
+        error: `Product with ID ${item.productId} is no longer available.`,
       });
     }
 
-    if (product.stock < cartItem.quantity) {
+    if (product.stock < item.quantity) {
       return res.status(400).json({
-        error: `Insufficient stock for ${product.name}. Requested: ${cartItem.quantity}, Available: ${product.stock}.`,
+        error: `Insufficient stock for ${product.name}. Requested: ${item.quantity}, Available: ${product.stock}.`,
       });
     }
 
     const price = product.price;
-    const amount = price * cartItem.quantity;
+    const amount = price * item.quantity;
     totalAmount += amount;
 
     orderItems.push({
       productId: product.productId,
       name: product.name,
       price: price,
-      quantity: cartItem.quantity,
+      quantity: item.quantity,
       image: product.image,
     });
   }
 
   // 4. Create the order
   const order = new Order({
-    user: user._id,
+    user: req.userId || null,
     items: orderItems,
     totalAmount,
     shippingDetails,
@@ -130,9 +147,11 @@ export const placeOrder = async (req, res) => {
     );
   }
 
-  // Clear user cart
-  user.cart = [];
-  await user.save();
+  // Clear user cart if logged in
+  if (user) {
+    user.cart = [];
+    await user.save();
+  }
 
   await order.save();
 
@@ -148,4 +167,30 @@ export const getOrderHistory = async (req, res) => {
     createdAt: -1,
   });
   res.json(orders);
+};
+
+export const getGuestOrder = async (req, res) => {
+  const { id } = req.params;
+  const { accessKey } = req.query;
+
+  if (!id || !accessKey) {
+    return res.status(400).json({ error: "Missing order ID or access key." });
+  }
+
+  try {
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found." });
+    }
+
+    if (order.accessKey !== accessKey) {
+      return res
+        .status(403)
+        .json({ error: "Unauthorized access to this order." });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid order ID format." });
+  }
 };
