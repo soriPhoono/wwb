@@ -150,6 +150,46 @@ const handleCheckout = async () => {
     loading.value = false;
   }
 };
+
+const handleTestCheckout = async () => {
+  if (!isFormValid.value) {
+    error.value = "Please fill in shipping details first.";
+    return;
+  }
+
+  loading.value = true;
+  error.value = null;
+
+  try {
+    // Directly call the order creation endpoint with a mock ID
+    // The backend will accept this if BYPASS_PAYMENT_VERIFICATION is 'true'
+    const orderRes = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        shippingDetails: shippingDetails.value,
+        paymentIntentId: "pi_test_bypass", // This is the mock ID
+      }),
+    });
+
+    if (!orderRes.ok) {
+      const data = await orderRes.json();
+      throw new Error(data.error || "Test checkout failed.");
+    }
+
+    const orderData = await orderRes.json();
+    clearCart();
+    router.push({
+      name: "account",
+      query: { orderSuccess: "true", orderId: orderData.orderId },
+    });
+  } catch (err) {
+    console.error("Test Checkout error:", err);
+    error.value = "Test Mode Error: " + err.message;
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <template>
@@ -437,6 +477,27 @@ const handleCheckout = async () => {
                 class="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"
               ></span>
               <span v-else>Complete Order</span>
+            </button>
+
+            <!-- Test Checkout Bypass Button -->
+            <button
+              @click="handleTestCheckout"
+              :disabled="loading || !isFormValid"
+              class="w-full mt-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 font-bold py-4 rounded-2xl hover:bg-amber-500/20 transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Test Checkout (Bypass Stripe)
             </button>
 
             <button

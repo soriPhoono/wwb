@@ -1,0 +1,5 @@
+# stacks.yaml
+wwb:
+  repo: wwb
+  branch: main
+  compose_file: docker/stacks/wwb/docker-compose.yml
