@@ -50,6 +50,8 @@ const orderSchema = new Schema(
       unique: true,
     },
     shippingDetails: {
+      fullName: { type: String, required: true },
+      email: { type: String, required: true },
       address: String,
       city: String,
       state: String,
