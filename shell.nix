@@ -16,13 +16,6 @@ with pkgs;
       stripe-cli
 
       nodejs
-
-      (python3.withPackages (ps:
-        with ps; [
-          ansible-core
-          ansible
-          ansible-lint
-        ]))
     ];
 
     shellHook = ''
