@@ -14,10 +14,16 @@ vi.mock("../services/stripe.js", () => ({
   ),
 }));
 
+vi.mock("../services/email.js", () => ({
+  sendOrderConfirmation: vi.fn(() => Promise.resolve()),
+}));
+
 // Mock MongoDB models
 vi.mock("../db.js", () => ({
   connectDB: vi.fn(() => Promise.resolve()),
 }));
+
+import { sendOrderConfirmation } from "../services/email.js";
 
 describe("Guest Order API", () => {
   beforeEach(async () => {
@@ -87,6 +93,7 @@ describe("Guest Order API", () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("orderId");
     expect(res.body).toHaveProperty("accessKey");
+    expect(sendOrderConfirmation).toHaveBeenCalled();
   });
 
   it("should allow retrieving a guest order via access key", async () => {

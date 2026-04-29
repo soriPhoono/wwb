@@ -5,6 +5,7 @@ import {
   createPaymentIntent,
   retrievePaymentIntent,
 } from "../services/stripe.js";
+import { sendOrderConfirmation } from "../services/email.js";
 import crypto from "crypto";
 
 export const createOrderPaymentIntent = async (req, res) => {
@@ -154,6 +155,11 @@ export const placeOrder = async (req, res) => {
   }
 
   await order.save();
+
+  // Send confirmation email asynchronously (don't block the response)
+  sendOrderConfirmation(order).catch((err) =>
+    console.error("Delayed email error:", err),
+  );
 
   res.status(201).json({
     message: "Order placed successfully.",

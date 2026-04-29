@@ -1,18 +1,5 @@
 import Stripe from "stripe";
-import fs from "fs";
-
-function readSecret(envKey) {
-  if (process.env[envKey]) return process.env[envKey];
-  const fileKey = `${envKey}_FILE`;
-  if (process.env[fileKey]) {
-    try {
-      return fs.readFileSync(process.env[fileKey], "utf8").trim();
-    } catch (e) {
-      console.error(`Could not read ${fileKey}:`, e.message);
-    }
-  }
-  return undefined;
-}
+import { readSecret } from "../utils/secrets.js";
 
 const secretKey = readSecret("STRIPE_SECRET_KEY");
 const stripe = new Stripe(secretKey);
