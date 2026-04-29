@@ -274,20 +274,23 @@ export function useCart() {
     const product = products.value.find((p) => compareIds(p, productId));
     if (!product) return;
 
-    const remaining = getAvailableStock(productId);
+    const availableToMe = getAvailableStock(productId);
     const existingItem = cart.value.find((item) => compareIds(item, productId));
 
     if (existingItem) {
-      if (remaining <= 0) {
-        alert("Cannot add more. No units available.");
+      if (existingItem.quantity >= availableToMe) {
+        alert(
+          "Cannot add more. No units available beyond what is already in your cart.",
+        );
         return;
       }
       existingItem.quantity += 1;
     } else {
-      if (remaining <= 0) {
+      if (availableToMe <= 0) {
         alert("This item is currently fully claimed by other users.");
         return;
       }
+
       cart.value.push({
         ...product,
         quantity: 1,
@@ -307,9 +310,11 @@ export function useCart() {
     if (!item) return;
 
     if (change > 0) {
-      const remaining = getAvailableStock(productId);
-      if (remaining <= 0) {
-        alert("Cannot add more. No units available.");
+      const availableToMe = getAvailableStock(productId);
+      if (item.quantity >= availableToMe) {
+        alert(
+          "Cannot add more. No units available beyond what is already in your cart.",
+        );
         return;
       }
     }

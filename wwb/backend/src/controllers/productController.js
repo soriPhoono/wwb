@@ -4,7 +4,7 @@ import User from "../models/User.js";
 // ── Cache Configuration ────────────────────────────────────────────
 let cachedClaimedCounts = null;
 let lastClaimedCountsUpdate = 0;
-const CLAIMED_COUNTS_TTL = 15000; // 15 seconds
+const CLAIMED_COUNTS_TTL = 2000; // 2 seconds
 
 async function getClaimedCountsMap() {
   const now = Date.now();
