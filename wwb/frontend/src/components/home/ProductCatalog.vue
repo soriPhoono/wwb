@@ -1,9 +1,20 @@
 <script setup>
-import { computed } from "vue";
-import { useCart, products } from "../../composables/useCart";
+import { ref, onMounted } from "vue";
+import { useCart } from "../../composables/useCart";
 const { addToCart, canUseCart, getAvailableStock } = useCart();
 
-const featuredProducts = computed(() => products.value.slice(0, 4));
+const topProducts = ref([]);
+
+onMounted(async () => {
+  try {
+    const res = await fetch("/api/products/top");
+    if (res.ok) {
+      topProducts.value = await res.json();
+    }
+  } catch (err) {
+    console.error("Failed to fetch top products:", err);
+  }
+});
 </script>
 
 <template>
@@ -17,14 +28,12 @@ const featuredProducts = computed(() => products.value.slice(0, 4));
         <h2
           class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-5 tracking-tight"
         >
-          Featured items for the secure store demo
+          Most Purchased Items
         </h2>
         <p
           class="text-slate-400 max-w-2xl text-lg leading-relaxed mx-auto md:mx-0"
         >
-          These sample items are shown as a starting point for the storefront.
-          Users can add them to the shopping cart and keep them stored with
-          cookies.
+          Check out our most popular items based on customer purchases.
         </p>
       </div>
 
@@ -33,7 +42,7 @@ const featuredProducts = computed(() => products.value.slice(0, 4));
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
       >
         <article
-          v-for="product in featuredProducts"
+          v-for="product in topProducts"
           :key="product.productId || product._id || product.id"
           class="bg-slate-900/40 rounded-3xl shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1.5 transition-all duration-300 border border-white/5 flex flex-col group overflow-hidden"
         >

@@ -144,7 +144,7 @@ export const placeOrder = async (req, res) => {
   for (const item of orderItems) {
     await Product.findOneAndUpdate(
       { productId: item.productId, stock: { $gte: item.quantity } },
-      { $inc: { stock: -item.quantity } },
+      { $inc: { stock: -item.quantity, purchaseCount: item.quantity } },
     );
   }
 

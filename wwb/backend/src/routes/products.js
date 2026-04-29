@@ -9,12 +9,14 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  getTopProducts,
 } from "../controllers/productController.js";
 
 const router = Router();
 
 // GET /api/products
 router.get("/", getProducts);
+router.get("/top", getTopProducts);
 
 // GET /api/products/:id
 router.get("/:id", getProductById);

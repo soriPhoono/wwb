@@ -126,3 +126,23 @@ export const deleteProduct = async (req, res) => {
 
   res.json({ message: "Product deleted successfully." });
 };
+
+export const getTopProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isActive: true })
+      .sort({ purchaseCount: -1 })
+      .limit(4)
+      .lean();
+
+    const countsMap = await getClaimedCountsMap();
+
+    const enrichedProducts = products.map((p) => {
+      p.claimedCount = countsMap[p.productId || p._id] || 0;
+      return p;
+    });
+
+    res.json(enrichedProducts);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch top products." });
+  }
+};

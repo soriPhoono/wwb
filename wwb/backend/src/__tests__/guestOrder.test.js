@@ -94,6 +94,14 @@ describe("Guest Order API", () => {
     expect(res.body).toHaveProperty("orderId");
     expect(res.body).toHaveProperty("accessKey");
     expect(sendOrderConfirmation).toHaveBeenCalled();
+
+    // Verify purchaseCount increment
+    expect(Product.findOneAndUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        $inc: expect.objectContaining({ purchaseCount: 1 }),
+      }),
+    );
   });
 
   it("should allow retrieving a guest order via access key", async () => {

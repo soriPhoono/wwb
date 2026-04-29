@@ -44,6 +44,11 @@ const productSchema = new Schema(
       unique: true,
       sparse: true,
     },
+    purchaseCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt

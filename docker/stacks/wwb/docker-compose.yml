@@ -75,6 +75,7 @@ services:
       - twilio-verify-service-sid
       - stripe-secret-key
       - stripe-publishable-key
+      - resend-api-key
       - admin-email
       - admin-password
     environment:
@@ -173,6 +174,8 @@ secrets:
     file: ./secrets/stripe-secret-key.txt
   stripe-publishable-key:
     file: ./secrets/stripe-publishable-key.txt
+  resend-api-key:
+    file: ./secrets/resend-api-key.txt
   cloudflare-tunnel-token:
     file: ./secrets/cloudflare-tunnel-token.txt
   admin-email:
