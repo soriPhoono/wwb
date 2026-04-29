@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import ProductCatalog from "../home/ProductCatalog.vue";
 
 // Mock vue-router
@@ -16,7 +16,10 @@ vi.mock("../../composables/useCart", () => {
     useCart: () => ({
       addToCart: mockAddToCart,
       canUseCart: true,
-      getAvailableStock: vi.fn((id) => (id === 1 ? 5 : 0)),
+      getAvailableStock: vi.fn((product) => {
+        const id = product.productId || product._id || product.id || product;
+        return id === "1" ? 5 : 0;
+      }),
     }),
     products: {
       value: [
@@ -42,14 +45,48 @@ vi.mock("../../composables/useCart", () => {
 describe("ProductCatalog.vue", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Mock global fetch
+    global.fetch = vi.fn((url) => {
+      if (url === "/api/products/top") {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve([
+              {
+                id: 1,
+                productId: "1",
+                name: "Secure Item 1",
+                price: 99.99,
+                category: "Tech",
+                description: "Test desc",
+                stock: 10,
+                claimedCount: 5,
+              },
+              {
+                id: 2,
+                productId: "2",
+                name: "Out of Stock Item",
+                price: 49.99,
+                category: "Accessory",
+                description: "Test desc 2",
+                stock: 5,
+                claimedCount: 5,
+              },
+            ]),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
   });
 
-  it("renders correctly and displays products", () => {
+  it("renders correctly and displays products", async () => {
     const wrapper = mount(ProductCatalog, {
       global: {
         stubs: ["RouterLink"],
       },
     });
+
+    await flushPromises();
 
     // Check if the title is rendered
     expect(wrapper.text()).toContain("Product Catalog");
@@ -62,12 +99,14 @@ describe("ProductCatalog.vue", () => {
     expect(wrapper.text()).toContain("$99.99");
   });
 
-  it("displays correct stock availability status", () => {
+  it("displays correct stock availability status", async () => {
     const wrapper = mount(ProductCatalog, {
       global: {
         stubs: ["RouterLink"],
       },
     });
+
+    await flushPromises();
 
     // Item 1 has 5 stock
     expect(wrapper.text()).toContain("5 In Stock");
@@ -82,6 +121,9 @@ describe("ProductCatalog.vue", () => {
       },
     });
 
+    await flushPromises();
+    await wrapper.vm.$nextTick(); // Extra tick just in case
+
     const buttons = wrapper.findAll("button");
     expect(buttons.length).toBeGreaterThan(0);
 
@@ -90,6 +132,6 @@ describe("ProductCatalog.vue", () => {
 
     // Check if mockAddToCart was called with product id 1
     expect(mockAddToCart).toHaveBeenCalledTimes(1);
-    expect(mockAddToCart).toHaveBeenCalledWith(1);
+    expect(mockAddToCart).toHaveBeenCalledWith("1");
   });
 });

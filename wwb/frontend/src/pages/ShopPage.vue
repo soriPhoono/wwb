@@ -201,18 +201,12 @@ const closeModal = () => {
                 <span
                   class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border"
                   :class="
-                    getAvailableStock(
-                      product.productId || product._id || product.id,
-                    ) > 0
+                    getAvailableStock(product) > 0
                       ? 'text-green-400 border-green-500/20 bg-green-500/10'
                       : 'text-red-400 border-red-500/20 bg-red-500/10'
                   "
                 >
-                  {{
-                    getAvailableStock(
-                      product.productId || product._id || product.id,
-                    )
-                  }}
+                  {{ getAvailableStock(product) }}
                   Available
                 </span>
               </div>
@@ -332,14 +326,7 @@ const closeModal = () => {
                   >Availability</span
                 >
                 <span class="font-black text-white"
-                  >{{
-                    getAvailableStock(
-                      selectedProduct.productId ||
-                        selectedProduct._id ||
-                        selectedProduct.id,
-                    )
-                  }}
-                  Units</span
+                  >{{ getAvailableStock(selectedProduct) }} Units</span
                 >
               </div>
 

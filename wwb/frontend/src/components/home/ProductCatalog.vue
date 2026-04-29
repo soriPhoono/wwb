@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { useCart } from "../../composables/useCart";
+import { useCart, products, compareIds } from "../../composables/useCart";
 const { addToCart, canUseCart, getAvailableStock } = useCart();
 
 const topProducts = ref([]);
@@ -9,7 +9,18 @@ onMounted(async () => {
   try {
     const res = await fetch("/api/products/top");
     if (res.ok) {
-      topProducts.value = await res.json();
+      const data = await res.json();
+      topProducts.value = data;
+
+      // Ensure global products list has these items so getAvailableStock is accurate
+      data.forEach((p) => {
+        const existingIdx = products.value.findIndex((ep) => compareIds(ep, p));
+        if (existingIdx !== -1) {
+          products.value[existingIdx] = p;
+        } else {
+          products.value.push(p);
+        }
+      });
     }
   } catch (err) {
     console.error("Failed to fetch top products:", err);
@@ -95,18 +106,12 @@ onMounted(async () => {
                 <span
                   class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border"
                   :class="
-                    getAvailableStock(
-                      product.productId || product._id || product.id,
-                    ) > 0
+                    getAvailableStock(product) > 0
                       ? 'text-green-400 border-green-500/20 bg-green-500/10'
                       : 'text-red-400 border-red-500/20 bg-red-500/10'
                   "
                 >
-                  {{
-                    getAvailableStock(
-                      product.productId || product._id || product.id,
-                    )
-                  }}
+                  {{ getAvailableStock(product) }}
                   In Stock
                 </span>
               </div>

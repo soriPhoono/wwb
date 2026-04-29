@@ -31,7 +31,7 @@ const cart = ref([]);
 const isCartOpen = ref(false);
 
 // Helper to compare product identifiers robustly
-const compareIds = (idA, idB) => {
+export const compareIds = (idA, idB) => {
   if (!idA || !idB) return false;
   const getStr = (obj) => {
     if (typeof obj === "string" || typeof obj === "number") return String(obj);
@@ -221,37 +221,66 @@ export function useCart() {
     }, 0);
   };
 
-  const getAvailableStock = (productId) => {
-    const product = products.value.find((p) => compareIds(p, productId));
+  const getAvailableStock = (productIdOrProduct) => {
+    let product;
+    let productId;
+
+    if (
+      typeof productIdOrProduct === "object" &&
+      productIdOrProduct !== null &&
+      !Array.isArray(productIdOrProduct)
+    ) {
+      product = productIdOrProduct;
+      productId = product.productId || product._id || product.id;
+    } else {
+      productId = productIdOrProduct;
+    }
+
+    // Always prefer the object from the global 'products' list if it exists,
+    // as it is more likely to be the most recently fetched/synced data.
+    const globalProduct = products.value.find((p) => compareIds(p, productId));
+    if (globalProduct) {
+      product = globalProduct;
+    }
+
     if (!product) return 0;
 
     const myItem = cart.value.find((item) => compareIds(item, productId));
     const myQty = myItem ? myItem.quantity : 0;
 
-    // If logged in, myQty is expected to be part of product.claimedCount in the DB.
-    // For guests, their items are not in the database yet.
-    const claimedByOthers = user.value
-      ? Math.max(0, (product.claimedCount || 0) - myQty)
-      : product.claimedCount || 0;
+    const totalClaimedInDB = product.claimedCount || 0;
+    const stock = product.stock || 0;
 
-    return Math.max(0, (product.stock || 0) - claimedByOthers);
+    // Logic: Remaining = Total Stock - Others' Claims - My Local Claims
+    // For logged-in users, we assume totalClaimedInDB already includes myQty (synced).
+    // For guests, totalClaimedInDB does NOT include myQty.
+    let remaining;
+    if (user.value) {
+      // Logged in: myQty is already accounted for in totalClaimedInDB
+      remaining = stock - totalClaimedInDB;
+    } else {
+      // Guest: myQty is NOT in totalClaimedInDB
+      remaining = stock - totalClaimedInDB - myQty;
+    }
+
+    return Math.max(0, remaining);
   };
 
   const addToCart = async (productId) => {
     const product = products.value.find((p) => compareIds(p, productId));
     if (!product) return;
 
-    const available = getAvailableStock(productId);
+    const remaining = getAvailableStock(productId);
     const existingItem = cart.value.find((item) => compareIds(item, productId));
 
     if (existingItem) {
-      if (existingItem.quantity >= available) {
-        alert(`Cannot add more. Only ${available} units available in total.`);
+      if (remaining <= 0) {
+        alert("Cannot add more. No units available.");
         return;
       }
       existingItem.quantity += 1;
     } else {
-      if (available <= 0) {
+      if (remaining <= 0) {
         alert("This item is currently fully claimed by other users.");
         return;
       }
@@ -274,9 +303,9 @@ export function useCart() {
     if (!item) return;
 
     if (change > 0) {
-      const available = getAvailableStock(productId);
-      if (item.quantity >= available) {
-        alert(`Cannot add more. Only ${available} units available in total.`);
+      const remaining = getAvailableStock(productId);
+      if (remaining <= 0) {
+        alert("Cannot add more. No units available.");
         return;
       }
     }
