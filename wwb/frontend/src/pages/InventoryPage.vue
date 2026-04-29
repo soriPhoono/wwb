@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useAuth } from "../composables/useAuth";
+import { products, fetchProducts } from "../composables/useCart";
 
 const { user } = useAuth();
-const products = ref([]);
 const loading = ref(true);
 const error = ref("");
 const searchQuery = ref("");
@@ -27,12 +27,10 @@ const imagePreview = ref(null);
 const imageFile = ref(null);
 const isSubmitting = ref(false);
 
-async function fetchProducts() {
+async function refreshCatalog() {
   loading.value = true;
   try {
-    const res = await fetch("/api/products");
-    if (!res.ok) throw new Error("Failed to fetch products");
-    products.value = await res.json();
+    await fetchProducts();
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -90,7 +88,8 @@ async function handleSubmit() {
       throw new Error(data.error || "Failed to save product");
     }
 
-    await fetchProducts();
+    await refreshCatalog();
+
     closeModal();
   } catch (err) {
     alert(err.message);
@@ -150,7 +149,7 @@ const filteredProducts = computed(() => {
   );
 });
 
-onMounted(fetchProducts);
+onMounted(refreshCatalog);
 </script>
 
 <template>
@@ -398,14 +397,22 @@ onMounted(fetchProducts);
                 <div
                   class="w-2 h-2 rounded-full"
                   :class="
-                    product.stock > 0
+                    product.stock - (product.claimedCount || 0) > 0
                       ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
                       : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
                   "
                 ></div>
-                <span class="text-slate-200 font-bold"
-                  >{{ product.stock }} Units</span
-                >
+                <div class="flex flex-col">
+                  <span class="text-slate-200 font-bold leading-none">
+                    {{
+                      Math.max(0, product.stock - (product.claimedCount || 0))
+                    }}
+                    Available
+                  </span>
+                  <span class="text-slate-500 text-[10px] font-medium mt-1">
+                    {{ product.stock }} Total Physical
+                  </span>
+                </div>
               </div>
             </div>
             <div

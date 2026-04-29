@@ -251,18 +251,22 @@ export function useCart() {
     const totalClaimedInDB = product.claimedCount || 0;
     const stock = product.stock || 0;
 
-    // Logic: Remaining = Total Stock - Others' Claims - My Local Claims
-    // For logged-in users, we assume totalClaimedInDB already includes myQty (synced).
-    // For guests, totalClaimedInDB does NOT include myQty.
-    let remaining;
+    // The user wants "Available Stock" to represent what is left to claim
+    // that no one else has claimed yet.
+    // totalClaimedInDB (from server) includes all claims from the User collection.
+    // If we are logged in, totalClaimedInDB includes our own items.
+    // If we are a guest, totalClaimedInDB does NOT include our items (which are only local/cookie).
+
+    let othersClaims;
     if (user.value) {
-      // Logged in: myQty is already accounted for in totalClaimedInDB
-      remaining = stock - totalClaimedInDB;
+      // Logged in: othersClaims = Total - Mine
+      othersClaims = Math.max(0, totalClaimedInDB - myQty);
     } else {
-      // Guest: myQty is NOT in totalClaimedInDB
-      remaining = stock - totalClaimedInDB - myQty;
+      // Guest: othersClaims = Total (since guest items aren't in totalClaimedInDB yet)
+      othersClaims = totalClaimedInDB;
     }
 
+    const remaining = stock - othersClaims;
     return Math.max(0, remaining);
   };
 

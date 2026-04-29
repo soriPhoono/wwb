@@ -49,7 +49,7 @@ const routes = [
     component: CheckoutPage,
   },
   {
-    path: "/order/:id",
+    path: "/order-details/:id",
     name: "order-details",
     component: () => import("../pages/OrderDetailsPage.vue"),
   },

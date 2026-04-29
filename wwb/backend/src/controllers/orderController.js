@@ -25,11 +25,14 @@ export const createOrderPaymentIntent = async (req, res) => {
 
   // Calculate total amount
   const productIds = items.map((item) => item.productId);
-  const products = await Product.find({ productId: { $in: productIds } });
+  const products = await Product.find({
+    $or: [{ productId: { $in: productIds } }, { _id: { $in: productIds } }],
+  });
 
   const productMap = {};
   products.forEach((p) => {
-    productMap[p.productId] = p;
+    if (p.productId) productMap[p.productId] = p;
+    productMap[p._id.toString()] = p;
   });
 
   let totalAmount = 0;
@@ -90,11 +93,14 @@ export const placeOrder = async (req, res) => {
 
   // 2. Fetch full product details for items
   const productIds = itemsToProcess.map((item) => item.productId);
-  const products = await Product.find({ productId: { $in: productIds } });
+  const products = await Product.find({
+    $or: [{ productId: { $in: productIds } }, { _id: { $in: productIds } }],
+  });
 
   const productMap = {};
   products.forEach((p) => {
-    productMap[p.productId] = p;
+    if (p.productId) productMap[p.productId] = p;
+    productMap[p._id.toString()] = p;
   });
 
   // 3. Validate availability and calculate total
@@ -142,10 +148,21 @@ export const placeOrder = async (req, res) => {
 
   // 5. Update stock and clear cart (Note: In production, use a transaction)
   for (const item of orderItems) {
-    await Product.findOneAndUpdate(
-      { productId: item.productId, stock: { $gte: item.quantity } },
+    const updated = await Product.findOneAndUpdate(
+      {
+        $or: [{ productId: item.productId }, { name: item.name }],
+        stock: { $gte: item.quantity },
+      },
       { $inc: { stock: -item.quantity, purchaseCount: item.quantity } },
+      { new: true },
     );
+
+    if (!updated) {
+      console.error(
+        `Critical: Stock update failed for ${item.name} (ID: ${item.productId}) during order ${order._id}`,
+      );
+      // In a real app, we would roll back here.
+    }
   }
 
   // Clear user cart if logged in

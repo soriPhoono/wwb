@@ -15,6 +15,19 @@ async function getClaimedCountsMap() {
     return cachedClaimedCounts;
   }
 
+  // 1. Fetch all products to create a mapping between _id and productId
+  const products = await Product.find({}, "_id productId").lean();
+  const idToProductId = {};
+  const productIdToId = {};
+  products.forEach((p) => {
+    const idStr = p._id.toString();
+    if (p.productId) {
+      idToProductId[idStr] = p.productId;
+      productIdToId[p.productId] = idStr;
+    }
+  });
+
+  // 2. Aggregate counts from all users
   const claimedCounts = await User.aggregate([
     { $unwind: "$cart" },
     {
@@ -25,14 +38,32 @@ async function getClaimedCountsMap() {
     },
   ]);
 
-  const countsMap = {};
+  // 3. Consolidate counts
+  // We want a map where BOTH _id and productId point to the total for that product
+  const consolidated = {};
   claimedCounts.forEach((c) => {
-    countsMap[c._id] = c.totalClaimed;
+    const key = c._id; // This could be an _id or a productId
+    const normalizedKey = productIdToId[key] || key; // Convert productId to _id if possible
+
+    if (!consolidated[normalizedKey]) {
+      consolidated[normalizedKey] = 0;
+    }
+    consolidated[normalizedKey] += c.totalClaimed;
   });
 
-  cachedClaimedCounts = countsMap;
+  const finalMap = {};
+  products.forEach((p) => {
+    const idStr = p._id.toString();
+    const count = consolidated[idStr] || 0;
+    finalMap[idStr] = count;
+    if (p.productId) {
+      finalMap[p.productId] = count;
+    }
+  });
+
+  cachedClaimedCounts = finalMap;
   lastClaimedCountsUpdate = now;
-  return countsMap;
+  return finalMap;
 }
 
 export const getProducts = async (req, res) => {
