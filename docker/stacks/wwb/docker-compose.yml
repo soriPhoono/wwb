@@ -94,7 +94,7 @@ services:
       STRIPE_PUBLISHABLE_KEY_FILE: /run/secrets/stripe-publishable-key
       STRIPE_SECRET_KEY_FILE: /run/secrets/stripe-secret-key
       RESEND_API_KEY_FILE: /run/secrets/resend-api-key
-      RESEND_FROM_EMAIL: orders.${DOMAIN_NAME}
+      RESEND_FROM_EMAIL: orders@${DOMAIN_NAME}
     networks:
       - wwb-internal
     volumes:
