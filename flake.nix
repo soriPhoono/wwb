@@ -83,11 +83,12 @@
               name = "deploy-ecom";
               runtimeInputs = with pkgs; [docker git];
               text = ''
-                echo "==> Deploying ecom stack..."
-                ECOM_DIR="$(git rev-parse --show-toplevel)/docker/clusters/ecom"
-                docker stack deploy \
-                  --compose-file "$ECOM_DIR/docker-compose.yml" \
-                  ecom
+                docker image pull ghcr.io/soriphoono/wwb-backend:latest &&
+                docker image pull ghcr.io/soriphoono/wwb-frontend:latest &&
+                docker stack rm testing wwb &&
+                sleep 20 && sops -d -i docker/clusters/testing/secrets/keys.txt &&
+                docker stack deploy -c docker/clusters/testing/docker-compose.yml testing &&
+                sops -e -i docker/clusters/testing/secrets/keys.txt
               '';
             });
           };
