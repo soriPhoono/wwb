@@ -1,32 +1,5 @@
 import twilio from "twilio";
-import fs from "fs";
-
-/**
- * Reads a secret value from an environment variable or a file.
- * This supports both direct environment variables and Docker Swarm/Kubernetes
- * secret files by looking for an optional _FILE suffix.
- *
- * @param {string} envKey - The name of the environment variable (e.g., 'TWILIO_ACCOUNT_SID')
- * @returns {string|undefined} The secret value if found, otherwise undefined.
- */
-function readSecret(envKey) {
-  // Check if the secret exists directly as an environment variable
-  if (process.env[envKey]) return process.env[envKey];
-
-  // If not found, check for a corresponding _FILE variant (common in Docker Swarm)
-  const fileKey = `${envKey}_FILE`;
-  if (process.env[fileKey]) {
-    try {
-      // Read the content of the file specified by the _FILE environment variable
-      return fs.readFileSync(process.env[fileKey], "utf8").trim();
-    } catch (e) {
-      // Log an error if the file exists but cannot be read
-      console.error(`Could not read ${fileKey}:`, e.message);
-    }
-  }
-  // Return undefined if the secret is not found in either location
-  return undefined;
-}
+import { readSecret } from "../utils/secrets.js";
 
 // Cached instance of the Twilio client to avoid re-initializing on every call
 let _client = null;

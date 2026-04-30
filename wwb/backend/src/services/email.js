@@ -29,7 +29,7 @@ export async function sendOrderConfirmation(order) {
     <head>
       <style>
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; background-color: #f8fafc; }
-        .container { max-width: 600px; mx-auto; margin: 40px auto; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .container { max-width: 600px; margin: 40px auto; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .header { background: #0f172a; color: white; padding: 40px; text-align: center; }
         .content { padding: 40px; }
         .order-id { font-family: monospace; color: #64748b; font-size: 12px; margin-bottom: 8px; display: block; }
@@ -50,7 +50,7 @@ export async function sendOrderConfirmation(order) {
         <div class="content">
           <span class="order-id">ORDER ID: ${_id}</span>
           <h2 style="margin: 0 0 20px; font-size: 18px; font-weight: 700;">Summary</h2>
-          
+
           ${items
             .map(
               (item) => `
@@ -65,7 +65,7 @@ export async function sendOrderConfirmation(order) {
           `,
             )
             .join("")}
-          
+
           <div class="total">
             <span>Total</span>
             <span style="color: #2563eb;">$${totalAmount.toFixed(2)}</span>
@@ -74,7 +74,7 @@ export async function sendOrderConfirmation(order) {
           <div style="text-align: center;">
             <a href="${trackingUrl}" class="button">Track Your Order</a>
           </div>
-          
+
           <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
             Questions about your order? Just reply to this email, we're here to help.
           </p>

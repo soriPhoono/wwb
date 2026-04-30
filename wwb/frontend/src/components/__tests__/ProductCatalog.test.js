@@ -20,11 +20,16 @@ vi.mock("../../composables/useCart", () => {
         const id = product.productId || product._id || product.id || product;
         return id === "1" ? 5 : 0;
       }),
+      getRemainingToClaim: vi.fn((product) => {
+        const id = product.productId || product._id || product.id || product;
+        return id === "1" ? 5 : 0;
+      }),
     }),
     products: {
       value: [
         {
           id: 1,
+          productId: "1",
           name: "Secure Item 1",
           price: 99.99,
           category: "Tech",
@@ -32,12 +37,24 @@ vi.mock("../../composables/useCart", () => {
         },
         {
           id: 2,
+          productId: "2",
           name: "Out of Stock Item",
           price: 49.99,
           category: "Accessory",
           description: "Test desc 2",
         },
       ],
+    },
+    compareIds: (idA, idB) => {
+      if (!idA || !idB) return false;
+      const getStr = (obj) => {
+        if (typeof obj === "string" || typeof obj === "number")
+          return String(obj);
+        return String(obj.productId || obj._id || obj.id || "");
+      };
+      const strA = getStr(idA);
+      const strB = getStr(idB);
+      return strA !== "" && strA === strB;
     },
   };
 });

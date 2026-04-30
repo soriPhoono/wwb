@@ -20,10 +20,12 @@ async function getClaimedCountsMap() {
   const idToProductId = {};
   const productIdToId = {};
   products.forEach((p) => {
-    const idStr = p._id.toString();
-    if (p.productId) {
-      idToProductId[idStr] = p.productId;
-      productIdToId[p.productId] = idStr;
+    if (p._id) {
+      const idStr = p._id.toString();
+      if (p.productId) {
+        idToProductId[idStr] = p.productId;
+        productIdToId[p.productId] = idStr;
+      }
     }
   });
 
@@ -43,21 +45,25 @@ async function getClaimedCountsMap() {
   const consolidated = {};
   claimedCounts.forEach((c) => {
     const key = c._id; // This could be an _id or a productId
-    const normalizedKey = productIdToId[key] || key; // Convert productId to _id if possible
+    if (key) {
+      const normalizedKey = productIdToId[key] || key; // Convert productId to _id if possible
 
-    if (!consolidated[normalizedKey]) {
-      consolidated[normalizedKey] = 0;
+      if (!consolidated[normalizedKey]) {
+        consolidated[normalizedKey] = 0;
+      }
+      consolidated[normalizedKey] += c.totalClaimed;
     }
-    consolidated[normalizedKey] += c.totalClaimed;
   });
 
   const finalMap = {};
   products.forEach((p) => {
-    const idStr = p._id.toString();
-    const count = consolidated[idStr] || 0;
-    finalMap[idStr] = count;
-    if (p.productId) {
-      finalMap[p.productId] = count;
+    if (p._id) {
+      const idStr = p._id.toString();
+      const count = consolidated[idStr] || 0;
+      finalMap[idStr] = count;
+      if (p.productId) {
+        finalMap[p.productId] = count;
+      }
     }
   });
 
@@ -144,11 +150,16 @@ export const deleteProduct = async (req, res) => {
     return res.status(404).json({ error: "Product not found." });
   }
 
-  if (product.productId !== undefined && product.productId !== null) {
+  // Remove product from all user carts
+  const productIdsToRemove = [];
+  if (product.productId) productIdsToRemove.push(String(product.productId));
+  if (product._id) productIdsToRemove.push(product._id.toString());
+
+  if (productIdsToRemove.length > 0) {
     try {
       await User.updateMany(
-        { "cart.productId": product.productId },
-        { $pull: { cart: { productId: product.productId } } },
+        { "cart.productId": { $in: productIdsToRemove } },
+        { $pull: { cart: { productId: { $in: productIdsToRemove } } } },
       );
     } catch (err) {
       console.error("Error removing product from user carts:", err);

@@ -1,16 +1,8 @@
 import jwt from "jsonwebtoken";
-import fs from "fs";
+import { readSecret } from "../utils/secrets.js";
 
 export function getJwtSecret() {
-  // Support Docker Swarm secret: mount the JWT secret as a secret file
-  if (process.env.JWT_SECRET_FILE) {
-    try {
-      return fs.readFileSync(process.env.JWT_SECRET_FILE, "utf8").trim();
-    } catch (e) {
-      console.error("Could not read JWT_SECRET_FILE:", e.message);
-    }
-  }
-  return process.env.JWT_SECRET || "dev-secret-change-in-production";
+  return readSecret("JWT_SECRET") || "dev-secret-change-in-production";
 }
 
 export function requireAuth(req, res, next) {
