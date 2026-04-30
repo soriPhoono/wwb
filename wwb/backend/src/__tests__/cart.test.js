@@ -89,6 +89,46 @@ describe("Cart API Integration", () => {
       expect(mockUser.save).toHaveBeenCalled();
     });
 
+    it("should filter out invalid ObjectIds to prevent CastError", async () => {
+      const mockUser = {
+        _id: "test-user-id",
+        roles: [],
+        save: vi.fn().mockResolvedValue(true),
+      };
+      User.findById.mockResolvedValue(mockUser);
+      Product.lean.mockResolvedValue([
+        {
+          _id: "60d5ecb8b0e9c42c88f1e1a1",
+          productId: "prod_1",
+          stock: 10,
+          name: "Test",
+        },
+      ]);
+      User.aggregate.mockResolvedValue([]); // No other users have claimed
+
+      await request(app)
+        .post("/api/cart")
+        .send({
+          cart: [
+            { productId: "prod_1", quantity: 1 },
+            { productId: "invalid_id_123", quantity: 1 },
+            { productId: "60d5ecb8b0e9c42c88f1e1a1", quantity: 1 },
+          ],
+        })
+        .set("Cookie", ["token=fake-token"]);
+
+      expect(Product.find).toHaveBeenCalledWith({
+        $or: [
+          {
+            productId: {
+              $in: ["prod_1", "invalid_id_123", "60d5ecb8b0e9c42c88f1e1a1"],
+            },
+          },
+          { _id: { $in: ["60d5ecb8b0e9c42c88f1e1a1"] } },
+        ],
+      });
+    });
+
     it("should handle numeric productId even if passed as string", async () => {
       const mockUser = {
         _id: "test-user-id",

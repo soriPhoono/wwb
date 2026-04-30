@@ -101,7 +101,47 @@ describe("Guest Order API", () => {
       expect.objectContaining({
         $inc: expect.objectContaining({ purchaseCount: 1 }),
       }),
+      expect.anything(),
     );
+  });
+
+  it("should filter out invalid ObjectIds to prevent CastError when querying products", async () => {
+    const findSpy = vi.spyOn(Product, "find").mockResolvedValue([
+      {
+        productId: "prod_1",
+        name: "Test Product",
+        price: 100,
+        isActive: true,
+        stock: 10,
+      },
+    ]);
+
+    await request(app)
+      .post("/api/orders/payment-intent")
+      .send({
+        items: [
+          { productId: "prod_1", quantity: 1 },
+          { productId: "invalid_id_format_123", quantity: 1 },
+          { productId: "60d5ecb8b0e9c42c88f1e1a1", quantity: 1 },
+        ],
+        shippingDetails: { fullName: "Guest User", email: "guest@example.com" },
+      });
+
+    // Expect the $or query to contain all IDs for productId, but ONLY the valid ObjectId for _id
+    expect(findSpy).toHaveBeenCalledWith({
+      $or: [
+        {
+          productId: {
+            $in: [
+              "prod_1",
+              "invalid_id_format_123",
+              "60d5ecb8b0e9c42c88f1e1a1",
+            ],
+          },
+        },
+        { _id: { $in: ["60d5ecb8b0e9c42c88f1e1a1"] } },
+      ],
+    });
   });
 
   it("should allow retrieving a guest order via access key", async () => {
