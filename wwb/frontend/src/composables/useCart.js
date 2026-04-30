@@ -311,39 +311,41 @@ export function useCart() {
     if (!product) return;
 
     const availableToMe = getAvailableStock(productId);
-    const existingItem = cart.value.find((item) => compareIds(item, productId));
+    const existingIndex = cart.value.findIndex((item) =>
+      compareIds(item, productId),
+    );
 
-    if (existingItem) {
-      if (existingItem.quantity >= availableToMe) {
+    if (existingIndex !== -1) {
+      if (cart.value[existingIndex].quantity >= availableToMe) {
         alert(
           "Cannot add more. No units available beyond what is already in your cart.",
         );
         return;
       }
-      existingItem.quantity += 1;
+      // Reactive-friendly property update
+      const updatedItem = { ...cart.value[existingIndex] };
+      updatedItem.quantity += 1;
+      cart.value[existingIndex] = updatedItem;
     } else {
       if (availableToMe <= 0) {
         alert("This item is currently fully claimed by other users.");
         return;
       }
 
-      cart.value.push({
-        ...product,
-        quantity: 1,
-      });
+      // Reactive-friendly array push
+      cart.value = [...cart.value, { ...product, quantity: 1 }];
     }
   };
 
   const removeFromCart = (productId) => {
-    cart.value = cart.value.filter((item) => {
-      const itemId = item.productId || item._id || item.id;
-      return String(itemId) !== String(productId);
-    });
+    cart.value = cart.value.filter((item) => !compareIds(item, productId));
   };
 
   const updateQuantity = (productId, change) => {
-    const item = cart.value.find((product) => compareIds(product, productId));
-    if (!item) return;
+    const index = cart.value.findIndex((item) => compareIds(item, productId));
+    if (index === -1) return;
+
+    const item = cart.value[index];
 
     if (change > 0) {
       const availableToMe = getAvailableStock(productId);
@@ -355,10 +357,13 @@ export function useCart() {
       }
     }
 
-    item.quantity += change;
+    const newQty = item.quantity + change;
 
-    if (item.quantity <= 0) {
+    if (newQty <= 0) {
       removeFromCart(productId);
+    } else {
+      const updatedItem = { ...item, quantity: newQty };
+      cart.value[index] = updatedItem;
     }
   };
 
