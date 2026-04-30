@@ -25,14 +25,18 @@ export const createOrderPaymentIntent = async (req, res) => {
 
   // Calculate total amount
   const productIds = items.map((item) => item.productId);
+  const validObjectIds = productIds.filter((id) =>
+    /^[0-9a-fA-F]{24}$/.test(id),
+  );
+
   const products = await Product.find({
-    $or: [{ productId: { $in: productIds } }, { _id: { $in: productIds } }],
+    $or: [{ productId: { $in: productIds } }, { _id: { $in: validObjectIds } }],
   });
 
   const productMap = {};
   products.forEach((p) => {
     if (p.productId) productMap[p.productId] = p;
-    productMap[p._id.toString()] = p;
+    if (p._id) productMap[p._id.toString()] = p;
   });
 
   let totalAmount = 0;
@@ -93,14 +97,18 @@ export const placeOrder = async (req, res) => {
 
   // 2. Fetch full product details for items
   const productIds = itemsToProcess.map((item) => item.productId);
+  const validObjectIds = productIds.filter((id) =>
+    /^[0-9a-fA-F]{24}$/.test(id),
+  );
+
   const products = await Product.find({
-    $or: [{ productId: { $in: productIds } }, { _id: { $in: productIds } }],
+    $or: [{ productId: { $in: productIds } }, { _id: { $in: validObjectIds } }],
   });
 
   const productMap = {};
   products.forEach((p) => {
     if (p.productId) productMap[p.productId] = p;
-    productMap[p._id.toString()] = p;
+    if (p._id) productMap[p._id.toString()] = p;
   });
 
   // 3. Validate availability and calculate total
