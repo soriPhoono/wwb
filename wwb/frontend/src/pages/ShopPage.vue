@@ -2,7 +2,8 @@
 import { computed, ref, onMounted } from "vue";
 import { useCart, products, fetchProducts } from "../composables/useCart";
 
-const { addToCart, canUseCart, getAvailableStock } = useCart();
+const { addToCart, canUseCart, getAvailableStock, getRemainingToClaim } =
+  useCart();
 
 const selectedProduct = ref(null);
 
@@ -201,12 +202,12 @@ const closeModal = () => {
                 <span
                   class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border"
                   :class="
-                    getAvailableStock(product) > 0
+                    getRemainingToClaim(product) > 0
                       ? 'text-green-400 border-green-500/20 bg-green-500/10'
                       : 'text-red-400 border-red-500/20 bg-red-500/10'
                   "
                 >
-                  {{ getAvailableStock(product) }}
+                  {{ getRemainingToClaim(product) }}
                   Available
                 </span>
               </div>
@@ -326,7 +327,7 @@ const closeModal = () => {
                   >Availability</span
                 >
                 <span class="font-black text-white"
-                  >{{ getAvailableStock(selectedProduct) }} Units</span
+                  >{{ getRemainingToClaim(selectedProduct) }} Units</span
                 >
               </div>
 

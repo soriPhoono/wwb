@@ -1,18 +1,19 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useCart, products, compareIds } from "../../composables/useCart";
-const { addToCart, canUseCart, getAvailableStock } = useCart();
+const { addToCart, canUseCart, getAvailableStock, getRemainingToClaim } =
+  useCart();
 
 const topProducts = ref([]);
 
-onMounted(async () => {
+const fetchTopProducts = async () => {
   try {
     const res = await fetch("/api/products/top");
     if (res.ok) {
       const data = await res.json();
       topProducts.value = data;
 
-      // Ensure global products list has these items so getAvailableStock is accurate
+      // Ensure global products list has these items so getRemainingToClaim is accurate
       data.forEach((p) => {
         const existingIdx = products.value.findIndex((ep) => compareIds(ep, p));
         if (existingIdx !== -1) {
@@ -25,6 +26,16 @@ onMounted(async () => {
   } catch (err) {
     console.error("Failed to fetch top products:", err);
   }
+};
+
+let interval;
+onMounted(async () => {
+  await fetchTopProducts();
+  interval = setInterval(fetchTopProducts, 5000);
+});
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval);
 });
 </script>
 
@@ -106,12 +117,12 @@ onMounted(async () => {
                 <span
                   class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border"
                   :class="
-                    getAvailableStock(product) > 0
+                    getRemainingToClaim(product) > 0
                       ? 'text-green-400 border-green-500/20 bg-green-500/10'
                       : 'text-red-400 border-red-500/20 bg-red-500/10'
                   "
                 >
-                  {{ getAvailableStock(product) }}
+                  {{ getRemainingToClaim(product) }}
                   In Stock
                 </span>
               </div>

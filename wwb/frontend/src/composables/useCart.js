@@ -143,7 +143,8 @@ export const fetchProducts = async () => {
   try {
     const res = await fetch("/api/products");
     if (res.ok) {
-      products.value = await res.json();
+      const data = await res.json();
+      products.value = data;
       // After products are loaded, perform a deep hydration/validation of the local cart.
       // This will automatically strip any items that are no longer in the database (isActive: false or deleted).
       isHydrating = true;
@@ -156,6 +157,11 @@ export const fetchProducts = async () => {
     console.error("Failed to fetch products:", err);
   }
 };
+
+// Start polling for product updates (stock, claimed counts, etc.)
+if (typeof window !== "undefined") {
+  setInterval(fetchProducts, 5000);
+}
 
 export function useCart() {
   // Fetch products on initial composable usage if empty
@@ -221,6 +227,10 @@ export function useCart() {
     }, 0);
   };
 
+  /**
+   * Returns how many units of a product the CURRENT user is allowed to have in their cart.
+   * This respects total stock minus what OTHERS have claimed.
+   */
   const getAvailableStock = (productIdOrProduct) => {
     let product;
     let productId;
@@ -236,8 +246,6 @@ export function useCart() {
       productId = productIdOrProduct;
     }
 
-    // Always prefer the object from the global 'products' list if it exists,
-    // as it is more likely to be the most recently fetched/synced data.
     const globalProduct = products.value.find((p) => compareIds(p, productId));
     if (globalProduct) {
       product = globalProduct;
@@ -251,22 +259,50 @@ export function useCart() {
     const totalClaimedInDB = product.claimedCount || 0;
     const stock = product.stock || 0;
 
-    // The user wants "Available Stock" to represent what is left to claim
-    // that no one else has claimed yet.
-    // totalClaimedInDB (from server) includes all claims from the User collection.
-    // If we are logged in, totalClaimedInDB includes our own items.
-    // If we are a guest, totalClaimedInDB does NOT include our items (which are only local/cookie).
-
     let othersClaims;
     if (user.value) {
-      // Logged in: othersClaims = Total - Mine
+      // Logged in: othersClaims = TotalInDB - MyQtyInDB (which is roughly myQty)
       othersClaims = Math.max(0, totalClaimedInDB - myQty);
     } else {
-      // Guest: othersClaims = Total (since guest items aren't in totalClaimedInDB yet)
+      // Guest: othersClaims = TotalInDB (all accounts)
       othersClaims = totalClaimedInDB;
     }
 
-    const remaining = stock - othersClaims;
+    const availableToMe = stock - othersClaims;
+    return Math.max(0, availableToMe);
+  };
+
+  /**
+   * Returns how many units are still "on the shelf" (unclaimed by ANYONE, including this user).
+   */
+  const getRemainingToClaim = (productIdOrProduct) => {
+    let product;
+    let productId;
+
+    if (
+      typeof productIdOrProduct === "object" &&
+      productIdOrProduct !== null &&
+      !Array.isArray(productIdOrProduct)
+    ) {
+      product = productIdOrProduct;
+      productId = product.productId || product._id || product.id;
+    } else {
+      productId = productIdOrProduct;
+    }
+
+    const globalProduct = products.value.find((p) => compareIds(p, productId));
+    if (globalProduct) {
+      product = globalProduct;
+    }
+
+    if (!product) return 0;
+
+    const myItem = cart.value.find((item) => compareIds(item, productId));
+    const myQty = myItem ? myItem.quantity : 0;
+
+    const availableToMe = getAvailableStock(product);
+    const remaining = availableToMe - myQty;
+
     return Math.max(0, remaining);
   };
 
@@ -364,6 +400,7 @@ export function useCart() {
     syncCart,
     clearCart,
     getAvailableStock,
+    getRemainingToClaim,
     fetchProducts,
     hydrateCart,
     simplifyCart,
