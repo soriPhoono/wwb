@@ -5,7 +5,7 @@
     <div class="container-custom">
       <div class="mb-14 text-center md:text-left">
         <span class="eyebrow">Store Workflow</span>
-        <h2 class="section-heading text-slate-900">
+        <h2 class="section-heading text-white">
           How the secure buying process would work
         </h2>
       </div>
